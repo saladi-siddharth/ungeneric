@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="156" height="28" role="img" aria-label="design systems: 16">
+  <rect width="120" height="28" fill="#14120f"/>
+  <rect x="120" width="36" height="28" fill="#e4b500"/>
+  <text x="60" y="19" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13" fill="#f4efe6" text-anchor="middle">design systems</text>
+  <text x="138" y="19" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13" fill="#14120f" text-anchor="middle" font-weight="bold">16</text>
+</svg>

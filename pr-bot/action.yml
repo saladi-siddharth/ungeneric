@@ -1,0 +1,21 @@
+# Ungeneric PR bot - composite GitHub Action definition.
+# LOCAL TEMPLATE ONLY: this repo is private and this action has never been
+# published, pushed, or run on GitHub. The script writes the review comment
+# body to comment.md; posting it to the PR is the owner's later choice.
+name: ungeneric
+description: Audit changed HTML files for AI-UI slop and write a PR comment body + score badge.
+inputs:
+  fail-above:
+    description: Fail the check when the worst slop score exceeds this number.
+    required: false
+    default: "50"
+runs:
+  using: composite
+  steps:
+    - name: Audit changed HTML files
+      shell: bash
+      run: |
+        git fetch origin ${{ github.base_ref }} --depth=1 || true
+        node pr-bot/ungeneric-pr.mjs --diff origin/${{ github.base_ref }}...HEAD \
+          --out comment.md --badge badge.svg --fail-above ${{ inputs.fail-above }}
+        cat comment.md

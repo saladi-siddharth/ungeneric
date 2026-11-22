@@ -1,0 +1,15 @@
+{
+  "name": "ungeneric",
+  "version": "0.36.0",
+  "description": "Audit vibecoded, AI-looking HTML on 32 slop checks, rebuild it with a real design system, and re-audit to prove the fix. Free, local, no API key.",
+  "type": "module",
+  "bin": {
+    "ungeneric": "skill/ungeneric/install.mjs",
+    "ungeneric-cli": "cli.mjs"
+  },
+  "scripts": { "test": "node test/smoke.mjs" },
+  "keywords": ["html", "css", "design-system", "ai-slop", "vibecoding", "audit", "cli", "frontend", "agent-skill"],
+  "license": "MIT",
+  "engines": { "node": ">=18" },
+  "files": ["cli.mjs", "engine.js", "render-audit.mjs", "index.html", "app.js", "range-server.mjs", "directions", "skill", "fonts", "docs", "pr-bot"]
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="121" height="28" role="img" aria-label="API key: none">
+  <rect width="71" height="28" fill="#14120f"/>
+  <rect x="71" width="50" height="28" fill="#7fb069"/>
+  <text x="36" y="19" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13" fill="#f4efe6" text-anchor="middle">API key</text>
+  <text x="96" y="19" font-family="ui-monospace,Menlo,Consolas,monospace" font-size="13" fill="#14120f" text-anchor="middle" font-weight="bold">none</text>
+</svg>

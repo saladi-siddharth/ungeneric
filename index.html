@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+(function(){try{var t=localStorage.getItem('ungeneric-theme');if(!t)t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';document.documentElement.dataset.theme=t;}catch(e){}})();
+</script>
+<title>Ungeneric — turn AI-looking UI into designed UI</title>
+<meta name="description" content="Ungeneric audits vibecoded HTML for 21 AI-slop tells, rebuilds it with a real design system, and re-audits to prove the fix. Free, no API, runs in your browser.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b1a17'/%3E%3Ctext x='30' y='44' font-size='36' text-anchor='middle' font-family='Georgia,serif' font-weight='bold' fill='%23f6f5f2'%3EU%3C/text%3E%3Ccircle cx='47' cy='43' r='5' fill='%23e8622c'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root {
+    --bg:#0e1013; --surface:#15181d; --surface2:#1b1f26;
+    --ink:#ecebe6; --ink2:#c9c7c0; --mut:#96948c;
+    --line:#2a2f38; --line2:#21262d; --faint:#3d434d;
+    --acc:#e8622c; --acc-soft:rgba(232,98,44,.13);
+    --ok:#3fb970; --ok-soft:rgba(63,185,112,.12); --warn:#e0a03c; --warn-soft:rgba(224,160,60,.12);
+    --topbar:rgba(14,16,19,.85);
+    --r:8px; --shadow:0 1px 2px rgba(0,0,0,.35), 0 8px 28px rgba(0,0,0,.28);
+    color-scheme:dark;
+  }
+  [data-theme="light"] {
+    --bg:#f6f5f2; --surface:#ffffff; --surface2:#faf9f6;
+    --ink:#1b1a17; --ink2:#3d3a34; --mut:#74706a;
+    --line:#e6e3db; --line2:#efede6; --faint:#cfccc3;
+    --acc:#b7410f; --acc-soft:#f7ece5;
+    --ok:#1d9e4b; --ok-soft:#eaf5ec; --warn:#9a5b00; --warn-soft:#fdf3e3;
+    --topbar:rgba(246,245,242,.88);
+    --shadow:0 1px 2px rgba(27,26,23,.05), 0 4px 16px rgba(27,26,23,.04);
+    color-scheme:light;
+  }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:'Inter',system-ui,-apple-system,sans-serif; font-size:14px; line-height:1.5; -webkit-font-smoothing:antialiased; transition:background .2s, color .2s; }
+  .mono { font-family:'JetBrains Mono',monospace; }
+  @keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+  .rise { animation:rise .5s cubic-bezier(.2,.7,.2,1) both; }
+  .rise2 { animation:rise .5s cubic-bezier(.2,.7,.2,1) .07s both; }
+  .rise3 { animation:rise .5s cubic-bezier(.2,.7,.2,1) .14s both; }
+  ::selection { background:var(--acc); color:#fff; }
+
+  /* ── top bar ─────────────────────────────── */
+  .topbar { position:sticky; top:0; z-index:50; display:flex; align-items:center; gap:13px; height:58px; padding:0 22px;
+    background:var(--topbar); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-bottom:1px solid var(--line); }
+  .logomark { width:28px; height:28px; border-radius:7px; background:var(--ink); color:var(--bg); display:grid; place-items:center;
+    font-family:'Fraunces',serif; font-weight:650; font-size:16px; flex:none; position:relative; transition:background .2s, color .2s; }
+  .logomark::after { content:''; position:absolute; right:3px; bottom:3px; width:4px; height:4px; border-radius:50%; background:var(--acc); }
+  .wordmark { font-family:'Fraunces',serif; font-weight:650; font-size:19px; letter-spacing:-.02em; }
+  .verchip { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--mut); border:1px solid var(--line); border-radius:100px; padding:2px 8px; background:var(--surface); }
+  .topbar .spacer { flex:1; }
+  .topstats { display:flex; align-items:center; gap:16px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:var(--mut); }
+  .topstats b { color:var(--ink); font-weight:500; }
+  .livedot { display:flex; align-items:center; gap:6px; }
+  .livedot i { width:7px; height:7px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px var(--ok-soft); }
+  #themeToggle { width:32px; height:32px; padding:0; display:grid; place-items:center; border-radius:100px; flex:none; }
+  #themeToggle svg { width:15px; height:15px; stroke:var(--ink2); }
+  #themeToggle .sun { display:none; } #themeToggle .moon { display:block; }
+  [data-theme="light"] #themeToggle .sun { display:block; } [data-theme="light"] #themeToggle .moon { display:none; }
+
+  /* ── hero ────────────────────────────────── */
+  .hero { max-width:1240px; margin:0 auto; padding:34px 22px 22px; display:flex; align-items:flex-end; justify-content:space-between; gap:28px; }
+  .hero h1 { font-family:'Fraunces',serif; font-weight:650; font-size:33px; letter-spacing:-.02em; line-height:1.12; margin:0 0 8px; }
+  .hero h1 em { font-style:italic; font-weight:500; color:var(--acc); }
+  .hero p { margin:0; color:var(--mut); font-size:14.5px; max-width:56ch; }
+  .hero .proofs { display:flex; gap:8px; flex:none; flex-wrap:wrap; justify-content:flex-end; }
+  .proof { font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--ink2); background:var(--surface); border:1px solid var(--line); border-radius:100px; padding:6px 12px; white-space:nowrap; }
+
+  /* ── layout ──────────────────────────────── */
+  main { max-width:1240px; margin:0 auto; padding:0 22px 26px; display:grid; grid-template-columns:384px 1fr; gap:18px; align-items:start; }
+
+  /* ── control rail ────────────────────────── */
+  .left { background:var(--surface); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); padding:20px; display:flex; flex-direction:column; gap:13px; }
+  .steplabel { display:flex; align-items:center; gap:9px; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.16em; color:var(--ink2); margin:8px 0 -4px; }
+  .steplabel::before { width:16px; height:16px; border-radius:50%; background:var(--ink); color:var(--bg);
+    font-size:9px; display:grid; place-items:center; letter-spacing:0; flex:none; }
+  .steplabel::before { content:attr(data-n); }
+  .steplabel.alt::before { content:'·'; background:var(--line); color:var(--mut); }
+  .steplabel .hint { color:var(--mut); text-transform:none; letter-spacing:.02em; font-weight:400; }
+  .steplabel::after { content:''; flex:1; border-top:1px solid var(--line2); }
+
+  textarea, input[type=url] { width:100%; border:1px solid var(--line); border-radius:var(--r); background:var(--surface2); padding:11px 12px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.6; color:var(--ink); transition:border-color .15s, box-shadow .15s, background .15s; }
+  textarea { min-height:150px; resize:vertical; }
+  textarea:focus, input[type=url]:focus { outline:none; border-color:var(--acc); background:var(--surface); box-shadow:0 0 0 3px var(--acc-soft); }
+  textarea::placeholder, input::placeholder { color:var(--faint); }
+
+  button { font-family:'Inter',sans-serif; font-size:12.5px; font-weight:500; border:1px solid var(--line); background:var(--surface); color:var(--ink2);
+    padding:10px 14px; border-radius:var(--r); cursor:pointer; transition:all .15s ease; }
+  button:hover { border-color:var(--faint); background:var(--surface2); color:var(--ink); }
+  button:active { transform:translateY(1px); }
+  button:disabled { opacity:.45; cursor:default; transform:none; }
+  button.primary { background:var(--ink); border-color:var(--ink); color:var(--bg); font-weight:600; letter-spacing:.01em; }
+  button.primary:hover { background:var(--acc); border-color:var(--acc); color:#fff; }
+  button.ghost { background:transparent; border-style:dashed; color:var(--mut); font-weight:400; }
+  button.ghost:hover { color:var(--ink); border-color:var(--faint); background:var(--surface2); }
+
+  .row { display:flex; gap:8px; }
+  .row button { flex:1; }
+
+  /* score + mode */
+  .score { display:flex; align-items:center; gap:16px; border:1px solid var(--line); border-radius:var(--r); padding:14px 16px; background:var(--surface2); }
+  .score .n { font-family:'Fraunces',serif; font-size:48px; font-weight:650; line-height:1; min-width:76px; text-align:center; }
+  .score .lbl { font-size:13px; color:var(--mut); line-height:1.4; }
+  .score .lbl b { color:var(--ink); font-family:'JetBrains Mono',monospace; font-size:9.5px; font-weight:500; text-transform:uppercase; letter-spacing:.16em; display:block; margin-bottom:3px; }
+  .mode { font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.04em; text-transform:uppercase; border-left:3px solid var(--acc);
+    background:var(--acc-soft); border-radius:0 6px 6px 0; padding:8px 12px; color:var(--ink); display:none; }
+  .mode b { color:var(--acc); }
+
+  /* findings */
+  .findings { overflow-y:auto; max-height:280px; display:flex; flex-direction:column; gap:6px; }
+  .finding { border:1px solid var(--line2); border-left:3px solid var(--acc); border-radius:0 7px 7px 0; background:var(--surface2); padding:8px 11px; font-size:12.5px; animation:rise .35s both; }
+  .finding b { font-family:'JetBrains Mono',monospace; font-weight:500; font-size:10px; text-transform:uppercase; letter-spacing:.08em; display:block; margin-bottom:2px; }
+  .finding .why { color:var(--mut); }
+  .finding .w { float:right; font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--acc); }
+
+  /* direction picker */
+  button.dir { text-align:left; padding:10px 12px; font-weight:400; font-size:13.5px; display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  button.dir .mono { font-size:9px; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); display:block; margin-bottom:2px; }
+  button.dir.on { background:var(--ink); border-color:var(--ink); color:var(--bg); }
+  button.dir.on .mono { color:var(--acc); }
+  button.dir .swatches { display:flex; gap:3px; flex-shrink:0; }
+  button.dir .swatches i { width:11px; height:11px; border-radius:3px; border:1px solid rgba(128,128,128,.45); display:block; }
+  .rec { position:absolute; top:-7px; right:8px; background:var(--acc); color:#fff; font-family:'JetBrains Mono',monospace; font-size:8.5px; letter-spacing:.1em; text-transform:uppercase; padding:2px 7px; border-radius:100px; display:none; z-index:2; }
+  .dirwrap { position:relative; }
+
+  .mixlab { display:flex; align-items:center; justify-content:space-between; gap:8px; font-family:'JetBrains Mono',monospace; font-size:9.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--mut); border:1px solid var(--line); border-radius:var(--r); padding:5px 8px 5px 10px; cursor:pointer; background:var(--surface2); }
+  .mixlab input { width:24px; height:24px; border:none; padding:0; background:none; cursor:pointer; }
+
+  .cli-hint { font-family:'JetBrains Mono',monospace; font-size:10.5px; line-height:1.7; color:var(--mut); border:1px dashed var(--line); border-radius:var(--r); padding:10px 12px; background:var(--surface2); }
+  .cli-hint b { color:var(--ink); font-weight:500; }
+  .honest { font-size:12px; color:var(--mut); line-height:1.55; border-top:1px solid var(--line2); padding-top:11px; }
+
+  /* ── stage / panes ───────────────────────── */
+  .right { display:flex; flex-direction:column; gap:12px; min-width:0; position:sticky; top:76px; }
+  .righthead { display:flex; justify-content:space-between; align-items:center; padding:0 2px; }
+  .righthead h2 { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:500; text-transform:uppercase; letter-spacing:.18em; color:var(--mut); margin:0; }
+  .devbtns { display:flex; background:var(--surface); border:1px solid var(--line); border-radius:100px; padding:3px; gap:2px; }
+  button.devbtn { padding:5px 14px; font-size:11px; border:none; background:transparent; border-radius:100px; color:var(--mut); }
+  button.devbtn:hover { background:var(--surface2); }
+  button.devbtn.on { background:var(--ink); color:var(--bg); }
+  .panes { display:grid; grid-template-columns:1fr 1fr; gap:14px; min-height:520px; }
+  .pane { display:flex; flex-direction:column; border:1px solid var(--line); border-radius:12px; background:var(--surface); box-shadow:var(--shadow); overflow:hidden; min-width:0; }
+  .pane .ph { display:flex; justify-content:space-between; align-items:center; align-self:stretch; gap:10px; padding:9px 14px; border-bottom:1px solid var(--line2);
+    font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:.14em; color:var(--mut); background:var(--surface2); }
+  .pane .ph::before { content:''; width:8px; height:8px; border-radius:50%; background:var(--faint); margin-right:2px; flex:none; }
+  .pane .ph span { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pane .ph span:first-child { display:flex; align-items:center; gap:8px; flex:none; }
+  .pane .ph span:last-child { text-align:right; }
+  .pane.after .ph { background:var(--ink); color:var(--bg); border-bottom-color:var(--ink); }
+  .pane.after .ph::before { background:var(--acc); }
+  .pane.after .ph span { color:inherit; }
+  .fxchip { font-family:'JetBrains Mono',monospace; font-size:10.5px; padding:5px 10px; border:1px solid var(--line); background:transparent; color:var(--ink2); cursor:pointer; border-radius:100px; }
+  .fxchip.on { background:var(--ink); color:var(--bg); border-color:var(--ink); }
+  .fxint.on { background:var(--ink) !important; color:var(--bg) !important; border-color:var(--ink) !important; }
+  .verifychip { display:flex; align-items:center; gap:8px; padding:7px 13px; font-family:'JetBrains Mono',monospace; font-size:11.5px; line-height:1.3; border-bottom:1px solid var(--line2); }
+  .verifychip .vdot { width:8px; height:8px; border-radius:100%; flex:none; }
+  .verifychip #verifyScore { white-space:nowrap; flex:none; }
+  .verifychip.pass { background:var(--ok-soft); color:var(--ok); } .verifychip.pass .vdot { background:var(--ok); }
+  .verifychip.warn { background:var(--warn-soft); color:var(--warn); } .verifychip.warn .vdot { background:var(--warn); }
+  .verifychip .vnote { opacity:.75; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .pane iframe { flex:1; border:0; width:100%; background:#fff; }
+  .panes.phone .pane { align-items:center; background:var(--surface2); }
+  .panes.phone .pane iframe { width:390px; max-width:100%; border-left:1px solid var(--line); border-right:1px solid var(--line); background:#fff; }
+  .empty { flex:1; display:flex; align-items:center; justify-content:center; color:var(--mut); padding:34px; text-align:center; }
+  .empty-big { font-family:'Fraunces',serif; font-weight:500; font-size:30px; letter-spacing:-.01em; color:var(--faint); margin-bottom:8px; }
+  .empty-sub { max-width:26em; margin:0 auto; font-size:13px; line-height:1.6; color:var(--mut); }
+  #compareBox { border-bottom:1px solid var(--line2); }
+
+  #toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--ink); color:var(--bg);
+    font-family:'JetBrains Mono',monospace; font-size:12px; padding:10px 18px; border-radius:100px; box-shadow:0 8px 24px rgba(0,0,0,.3); transition:transform .25s cubic-bezier(.2,.7,.2,1); z-index:99; }
+  #toast.show { transform:translateX(-50%) translateY(0); }
+
+  /* ── footer ──────────────────────────────── */
+  footer.trust { max-width:1240px; margin:0 auto; padding:0 22px 30px; display:flex; justify-content:space-between; gap:18px; flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.06em; color:var(--mut); }
+  footer.trust b { color:var(--ink2); font-weight:500; }
+
+  @media (max-width: 980px) {
+    main { grid-template-columns:1fr; }
+    .right { position:static; }
+    .hero { flex-direction:column; align-items:flex-start; gap:14px; padding-top:24px; }
+    .hero h1 { font-size:27px; }
+    .hero .proofs { justify-content:flex-start; }
+    .topstats .hidep { display:none; }
+    .verchip { display:none; }
+    .livedot { font-size:0; gap:0; }
+    .panes { grid-template-columns:1fr; min-height:0; }
+    .pane { min-height:340px; }
+    .row { flex-wrap:wrap; }
+    #urlIn { min-width:0; flex:1 1 55%; }
+    #fetchUrl { flex:0 0 auto; }
+    .findings { max-height:none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar rise">
+  <div class="logomark">U</div>
+  <div class="wordmark">Ungeneric</div>
+  <span class="verchip">v0.1 · local</span>
+  <div class="spacer"></div>
+  <div class="topstats">
+    <span class="hidep"><b>32</b> checks</span>
+    <span class="hidep"><b id="dirCountTop">16</b> systems</span>
+    <span class="hidep">web · cli · skill</span>
+    <span class="livedot"><i></i>runs in your browser</span>
+  </div>
+  <button id="themeToggle" aria-label="Toggle dark and light theme" title="Toggle theme">
+    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+</header>
+
+<section class="hero rise2">
+  <div>
+    <h1>Turn AI-looking pages into <em>designed</em> ones.</h1>
+    <p>Paste vibecoded HTML or fetch a live URL. Ungeneric audits 32 slop tells, rebuilds the page with a real design system, then re-audits the result to prove the fix.</p>
+  </div>
+  <div class="proofs">
+    <span class="proof">no account</span>
+    <span class="proof">no API key</span>
+    <span class="proof">free &amp; open source</span>
+  </div>
+</section>
+
+<main>
+  <section class="left rise2">
+    <div class="steplabel" data-n="1">The page</div>
+    <textarea id="src" placeholder="Paste the HTML of an AI-generated page here..." spellcheck="false"></textarea>
+    <div class="row">
+      <input id="urlIn" type="url" placeholder="...or paste a live URL to audit it">
+      <button id="fetchUrl" class="ghost">Fetch</button>
+    </div>
+    <button id="sample" class="ghost">Load a vibecoded sample</button>
+
+    <div class="steplabel" data-n="2">Audit</div>
+    <button id="audit" class="primary">Find the slop</button>
+    <div class="score" id="scoreBox" style="display:none">
+      <div class="n" id="scoreN">0</div>
+      <div class="lbl"><b>slop score</b><span id="scoreLbl"></span></div>
+    </div>
+    <div class="mode" id="modeBox"></div>
+    <div class="findings" id="findings"></div>
+
+    <div class="steplabel" data-n="3">Pick a direction · <span id="dirCount"></span></div>
+    <div id="dirList" style="display:flex;flex-direction:column;gap:7px;max-height:290px;overflow-y:auto"></div>
+    <div class="row">
+      <button id="importDir" class="ghost" style="flex:1">Import direction JSON</button>
+      <button id="exportDir" class="ghost" style="flex:1" disabled>Export current</button>
+    </div>
+    <input type="file" id="dirFile" accept=".json,application/json" style="display:none">
+
+    <div class="steplabel alt">or · style from a screenshot</div>
+    <div class="row">
+      <button id="refShot" class="ghost" style="flex:1">Upload a reference screenshot</button>
+      <input type="file" id="refFile" accept="image/*" style="display:none">
+    </div>
+    <div class="row" id="refVibe" style="display:none">
+      <button class="ghost refv on" data-v="sans" style="flex:1">Sans</button>
+      <button class="ghost refv" data-v="serif" style="flex:1">Serif</button>
+      <button class="ghost refv" data-v="mono" style="flex:1">Mono</button>
+    </div>
+    <div id="refSwatches" style="display:none;gap:6px;margin-top:6px"></div>
+
+    <div class="steplabel alt">or · mix your own</div>
+    <div class="row">
+      <label class="mixlab" style="flex:1">bg <input type="color" id="mixBg" value="#f4efe6"></label>
+      <label class="mixlab" style="flex:1">ink <input type="color" id="mixInk" value="#1c1a16"></label>
+      <label class="mixlab" style="flex:1">accent <input type="color" id="mixAccent" value="#e4572e"></label>
+    </div>
+    <div class="row">
+      <button class="ghost mixv on" data-v="sans" style="flex:1">Sans</button>
+      <button class="ghost mixv" data-v="serif" style="flex:1">Serif</button>
+      <button class="ghost mixv" data-v="mono" style="flex:1">Mono</button>
+      <button class="ghost mixr on" data-r="0" style="flex:1">Square</button>
+      <button class="ghost mixr" data-r="10" style="flex:1">Soft</button>
+      <button class="ghost mixr" data-r="24" style="flex:1">Round</button>
+    </div>
+    <button id="mixApply" class="ghost" style="width:100%">Restyle with my mix</button>
+
+    <div class="steplabel" data-n="4">Effects · <span class="hint">auto-picked, tune as you like</span></div>
+    <div class="row" id="fxPresets">
+      <button class="ghost fxpre" data-p="calm" style="flex:1">Calm</button>
+      <button class="ghost fxpre on" data-p="bold" style="flex:1">Bold</button>
+      <button class="ghost fxpre" data-p="wild" style="flex:1">Wild</button>
+    </div>
+    <div id="fxList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+    <div class="row" id="fxIntensity">
+      <button class="ghost fxint on" data-i="full" style="flex:1">Full motion</button>
+      <button class="ghost fxint" data-i="subtle" style="flex:1">Subtle</button>
+    </div>
+    <button id="restyle" class="primary">Make it designed</button>
+    <div class="row">
+      <button id="copyOut" style="display:none">Copy HTML</button>
+      <button id="dlOut" style="display:none">Download file</button>
+      <button id="dlZip" style="display:none">Download ZIP</button>
+      <button id="dlReact" style="display:none">React component</button>
+      <button id="openOut" style="display:none">Open full page</button>
+      <button id="shareCard" style="display:none">Share card</button>
+    </div>
+    <div class="row">
+      <button id="editToggle" class="ghost" style="display:none;flex:1">Edit text in preview</button>
+      <button id="editExport" class="ghost" style="display:none;flex:1" disabled>Export edited</button>
+      <button id="compareToggle" class="ghost" style="display:none;flex:1">Before/after slider</button>
+    </div>
+    <div id="cardBox" style="display:none;margin-top:10px">
+      <img id="cardImg" alt="Before and after share card" style="width:100%;border:1px solid var(--line);border-radius:var(--r);display:block">
+      <a id="cardDl" download="ungeneric-before-after.png" style="display:block;text-align:center;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--acc)">download the card (PNG)</a>
+    </div>
+    <div id="notesBox" style="display:none">
+      <div class="steplabel alt">copy notes</div>
+      <div class="findings" id="notes"></div>
+    </div>
+    <div class="cli-hint">Also runs everywhere: <b>node cli.mjs page.html -d swiss</b> in any terminal, on files or URLs — or drop the skill folder into Claude Code, Codex, Cursor or Gemini CLI.</div>
+    <div class="honest">Honest scope: this rebuilds structure with a real design system — typography, palette, surfaces, spacing, icons, hero layout, copy cleanup. A "slop score" is a heuristic, not a judgment of your product.</div>
+  </section>
+
+  <section class="right rise3">
+    <div class="righthead">
+      <h2>Before / After</h2>
+      <div class="devbtns">
+        <button id="devDesktop" class="devbtn">Desktop</button>
+        <button id="devPhone" class="devbtn">Phone</button>
+      </div>
+    </div>
+    <div class="panes">
+      <div class="pane"><div class="ph"><span>Before</span><span id="beforeMeta"></span></div><div class="empty" id="beforeEmpty"><div><div class="empty-big">The before</div><div class="empty-sub">Your AI-generated page lands here. First run loads a sample for you.</div></div></div><iframe id="beforeFrame" style="display:none" sandbox=""></iframe></div>
+      <div class="pane after"><div class="ph"><span>After</span><span id="afterMeta"></span></div><div id="compareBox" style="display:none;position:relative;height:60vh;overflow:hidden"><iframe id="cmpAfter" sandbox="allow-scripts allow-same-origin" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe><iframe id="cmpBefore" sandbox="" style="position:absolute;inset:0;width:100%;height:100%;border:0"></iframe><div id="cmpHandle" style="position:absolute;top:0;bottom:0;width:4px;background:var(--acc);cursor:ew-resize;z-index:5"><span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--acc);color:#fffdf6;font-size:10px;padding:4px 6px;font-family:'JetBrains Mono',monospace;border-radius:4px">DRAG</span></div></div><div class="verifychip" id="verifyChip" style="display:none"><span class="vdot"></span><span id="verifyScore"></span><span class="vnote" id="verifyNote"></span></div><div class="empty" id="afterEmpty"><div><div class="empty-big">The after</div><div class="empty-sub">The same page, rebuilt with a real design system. Give it a second.</div></div></div><iframe id="afterFrame" style="display:none" sandbox="allow-scripts allow-same-origin"></iframe></div>
+    </div>
+  </section>
+</main>
+
+<footer class="trust">
+  <div><b>Ungeneric</b> — your HTML never leaves this tab. No tracking, no server, no cost.</div>
+  <div>slop score = heuristic, not a verdict · MIT licensed</div>
+</footer>
+
+<div id="toast">copied</div>
+<script>
+document.getElementById('themeToggle').addEventListener('click', function(){
+  var next = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  document.documentElement.dataset.theme = next;
+  try { localStorage.setItem('ungeneric-theme', next); } catch(e) {}
+});
+</script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
