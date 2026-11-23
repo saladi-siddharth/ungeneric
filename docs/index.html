@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ungeneric — Don't just detect AI slop. Fix it and prove it.</title>
+<meta name="description" content="Ungeneric is a free skill for AI coding agents. It audits your page on 32 AI-slop checks, rebuilds it with one of sixteen real design systems, and re-audits the result to prove the fix.">
+<meta property="og:title" content="Ungeneric — Don't just detect AI slop. Fix it and prove it.">
+<meta property="og:description" content="A skill for Claude Code, Cursor, Codex, Copilot, Gemini, Antigravity and OpenCode that turns AI-looking UI into designed UI, and proves the fix.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://saladi-siddharth.github.io/ungeneric/">
+<meta property="og:image" content="media/banner.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23141310'/%3E%3Ctext x='30' y='44' font-size='36' text-anchor='middle' font-family='Georgia,serif' font-weight='bold' fill='%23f2efe7'%3EU%3C/text%3E%3Ccircle cx='47' cy='43' r='5' fill='%23e8622c'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#141310; --bg2:#1a1814; --panel:#1e1c17; --line:#2e2b24; --line2:#242220;
+  --ink:#f2efe7; --ink2:#cfccc2; --mut:#8f8b7f;
+  --acc:#e8622c; --acc-ink:#ff7a3d;
+  --ok:#4ecb7d; --serif:Georgia,'Times New Roman',serif;
+  --mono:ui-monospace,'JetBrains Mono','SF Mono',Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,'Inter','Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+::selection{background:var(--acc);color:#141310}
+a{color:inherit}
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+.mono{font-family:var(--mono)}
+.kicker{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--acc-ink)}
+.serif{font-family:var(--serif)}
+
+/* topbar */
+.top{position:sticky;top:0;z-index:10;background:rgba(20,19,16,.88);backdrop-filter:blur(10px);border-bottom:1px solid var(--line2)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;height:60px}
+.wordmark{font-family:var(--serif);font-weight:700;font-size:20px;letter-spacing:.02em;text-decoration:none}
+.wordmark em{color:var(--acc);font-style:italic}
+.top nav{display:flex;gap:22px;align-items:center}
+.top nav a{font-family:var(--mono);font-size:12.5px;color:var(--ink2);text-decoration:none;letter-spacing:.04em}
+.top nav a:hover{color:var(--ink)}
+.btn-gh{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:8px;padding:7px 14px;font-family:var(--mono);font-size:12.5px;color:var(--ink);text-decoration:none;transition:border-color .15s,background .15s}
+.btn-gh:hover{border-color:var(--acc);background:rgba(232,98,44,.08)}
+.btn-gh svg{width:15px;height:15px;fill:currentColor}
+
+/* hero */
+.hero{padding:96px 0 72px;border-bottom:1px solid var(--line2);position:relative;overflow:hidden}
+.hero .grid-bg{position:absolute;inset:0;background-image:linear-gradient(var(--line2) 1px,transparent 1px),linear-gradient(90deg,var(--line2) 1px,transparent 1px);background-size:56px 56px;opacity:.35;mask-image:radial-gradient(ellipse 90% 80% at 50% 0%,black 30%,transparent 75%);pointer-events:none}
+.hero .wrap{position:relative}
+.hero h1{font-family:var(--serif);font-weight:700;font-size:clamp(40px,6.4vw,76px);line-height:1.04;letter-spacing:-.015em;max-width:16ch;margin:18px 0 22px}
+.hero h1 em{color:var(--acc);font-style:italic}
+.hero p.sub{font-size:18px;color:var(--ink2);max-width:62ch;margin-bottom:36px}
+.hero p.sub strong{color:var(--ink);font-weight:600}
+
+.install{display:flex;align-items:stretch;max-width:640px;border:1px solid var(--line);border-radius:10px;background:var(--bg2);overflow:hidden;margin-bottom:20px}
+.install code{flex:1;font-family:var(--mono);font-size:14.5px;color:var(--ink);padding:15px 18px;overflow-x:auto;white-space:nowrap;scrollbar-width:none}
+.install code .prompt{color:var(--acc-ink);user-select:none}
+.copy{border:none;border-left:1px solid var(--line);background:transparent;color:var(--mut);font-family:var(--mono);font-size:12px;padding:0 18px;cursor:pointer;transition:color .15s,background .15s;min-width:86px}
+.copy:hover{color:var(--ink);background:rgba(232,98,44,.08)}
+.copy.done{color:var(--ok)}
+.hero .hint{font-family:var(--mono);font-size:12.5px;color:var(--mut);margin-bottom:34px}
+.badges{display:flex;flex-wrap:wrap;gap:10px}
+.badge{font-family:var(--mono);font-size:12px;color:var(--ink2);border:1px solid var(--line);border-radius:999px;padding:5px 13px;letter-spacing:.03em}
+.badge b{color:var(--acc-ink);font-weight:600}
+
+/* sections */
+section{padding:72px 0;border-bottom:1px solid var(--line2)}
+.sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:14px}
+.sec-num{font-family:var(--mono);font-size:13px;color:var(--acc-ink)}
+h2{font-family:var(--serif);font-weight:700;font-size:clamp(28px,3.6vw,42px);letter-spacing:-.01em;line-height:1.12}
+.sec-sub{color:var(--mut);max-width:64ch;margin-bottom:40px}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.step{background:var(--bg2);padding:28px 26px}
+.step .n{font-family:var(--mono);font-size:12px;color:var(--acc-ink);letter-spacing:.12em;margin-bottom:14px}
+.step h3{font-family:var(--serif);font-size:22px;margin-bottom:10px}
+.step p{font-size:14.5px;color:var(--ink2)}
+.step p code{font-family:var(--mono);font-size:13px;color:var(--acc-ink)}
+
+/* figures */
+figure{margin:0}
+figure img,figure video{width:100%;display:block;border:1px solid var(--line);border-radius:12px;background:var(--bg2)}
+figcaption{font-family:var(--mono);font-size:12.5px;color:var(--mut);margin-top:12px}
+.two-col{display:grid;grid-template-columns:1fr;gap:28px}
+
+/* systems */
+.sys-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:36px}
+.sys{font-family:var(--mono);font-size:13px;color:var(--ink2);border:1px solid var(--line);border-radius:8px;padding:11px 14px;display:flex;align-items:center;gap:10px}
+.sys i{width:9px;height:9px;border-radius:2px;background:var(--acc);flex:none;display:block}
+.sys:nth-child(4n+2) i{background:#d9a13c}
+.sys:nth-child(4n+3) i{background:#4ecb7d}
+.sys:nth-child(4n) i{background:#5b8bd9}
+
+/* agents */
+.agents{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:28px}
+.agent{background:var(--bg2);padding:18px 22px;display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.agent .name{font-weight:600;font-size:15px}
+.agent .invoke{font-family:var(--mono);font-size:12.5px;color:var(--mut)}
+.cmdline{background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:16px 20px;font-family:var(--mono);font-size:14px;overflow-x:auto;white-space:nowrap;color:var(--ink2);margin-bottom:10px}
+.cmdline .prompt{color:var(--acc-ink);user-select:none}
+.cmdline b{color:var(--ink);font-weight:500}
+
+/* honest */
+.honest{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.honest>div{background:var(--bg2);padding:26px}
+.honest h3{font-family:var(--serif);font-size:20px;margin-bottom:12px}
+.honest ul{list-style:none}
+.honest li{font-size:14.5px;color:var(--ink2);padding:7px 0 7px 20px;position:relative;border-bottom:1px solid var(--line2)}
+.honest li:last-child{border-bottom:none}
+.honest li::before{content:"";position:absolute;left:0;top:15px;width:8px;height:8px;border-radius:2px}
+.honest .win li::before{background:var(--ok)}
+.honest .lose li::before{background:var(--acc)}
+.note{margin-top:22px;font-size:14px;color:var(--mut);border-left:2px solid var(--acc);padding-left:16px}
+
+/* cta */
+.cta{padding:88px 0;text-align:center;border-bottom:1px solid var(--line2)}
+.cta h2{margin-bottom:16px}
+.cta p{color:var(--ink2);margin-bottom:32px}
+.cta .row{display:flex;gap:14px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--acc);color:#141310;font-family:var(--mono);font-size:13.5px;font-weight:600;text-decoration:none;border-radius:9px;padding:13px 26px;letter-spacing:.02em;transition:background .15s}
+.btn-primary:hover{background:var(--acc-ink)}
+.btn-ghost{border:1px solid var(--line);color:var(--ink);font-family:var(--mono);font-size:13.5px;text-decoration:none;border-radius:9px;padding:13px 26px;transition:border-color .15s}
+.btn-ghost:hover{border-color:var(--acc)}
+
+footer{padding:40px 0 56px;color:var(--mut);font-size:13.5px}
+footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:var(--ink2);text-decoration:none}
+footer a:hover{color:var(--acc-ink)}
+footer .mono{font-size:12.5px}
+
+/* reveal: hidden only when JS pre-marks them, so content is never invisible without JS */
+.reveal.pre{opacity:0;transform:translateY(14px)}
+.reveal{transition:opacity .6s cubic-bezier(.2,.7,.2,1),transform .6s cubic-bezier(.2,.7,.2,1)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){
+  .reveal{transition:none}
+  .reveal.pre{opacity:1;transform:none}
+  html{scroll-behavior:auto}
+}
+
+@media (max-width:860px){
+  .steps{grid-template-columns:1fr}
+  .sys-grid{grid-template-columns:repeat(2,1fr)}
+  .agents{grid-template-columns:1fr}
+  .honest{grid-template-columns:1fr}
+  .hero{padding:64px 0 56px}
+  .top nav a.hide-m{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="wordmark" href="#top">UNG<em>E</em>NERIC</a>
+    <nav>
+      <a class="hide-m" href="#how">How it works</a>
+      <a class="hide-m" href="#systems">Design systems</a>
+      <a class="hide-m" href="#honest">Honest scope</a>
+      <a class="btn-gh" href="https://github.com/saladi-siddharth/ungeneric" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        GitHub
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <div class="hero">
+    <div class="grid-bg"></div>
+    <div class="wrap">
+      <p class="kicker reveal">A skill for your AI coding agent</p>
+      <h1 class="reveal">Don't just detect AI slop. <em>Fix it and prove it.</em></h1>
+      <p class="sub reveal">Say <strong>"use ungeneric"</strong> in Claude Code, Cursor, Codex, Copilot, Gemini, Antigravity or OpenCode. Your agent audits the page on <strong>32 slop checks</strong>, rebuilds it with one of <strong>sixteen real design systems</strong>, then re-audits the result to prove the fix. Free, local, no account, no API key.</p>
+      <div class="install reveal">
+        <code><span class="prompt">$ </span>npx --yes github:saladi-siddharth/ungeneric</code>
+        <button class="copy" type="button" data-copy="npx --yes github:saladi-siddharth/ungeneric">Copy</button>
+      </div>
+      <p class="hint reveal">Installs the skill into each coding agent it detects on your machine.</p>
+      <div class="badges reveal">
+        <span class="badge"><b>32</b> source checks</span>
+        <span class="badge"><b>+12</b> rendered checks</span>
+        <span class="badge"><b>16</b> design systems</span>
+        <span class="badge"><b>7</b> agents</span>
+        <span class="badge">MIT license</span>
+      </div>
+    </div>
+  </div>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="sec-head reveal"><span class="sec-num">01</span><h2>How it works</h2></div>
+      <p class="sec-sub reveal">Detection alone is homework. Ungeneric closes the loop: audit, rebuild, then prove the score actually dropped.</p>
+      <div class="steps reveal">
+        <div class="step">
+          <p class="n">STEP 1 — AUDIT</p>
+          <h3>Finds the slop</h3>
+          <p>32 source checks: purple gradients, glow shadows, emoji icons, default fonts, stock marketing copy, generic heroes, card grids, "AI-powered" copy and more. <code>--render</code> adds 12 computed-style checks in headless Chromium.</p>
+        </div>
+        <div class="step">
+          <p class="n">STEP 2 — REBUILD</p>
+          <h3>Fixes it for you</h3>
+          <p>Restyles the page with a real design system, or recomposes heavy-slop pages into a new layout. Your content, links and claims survive; the layout, type, palette and motion do not.</p>
+        </div>
+        <div class="step">
+          <p class="n">STEP 3 — PROVE</p>
+          <h3>Verifies the fix</h3>
+          <p>Every rebuild is re-audited, and the CLI exits non-zero if the output did not improve. If it is not measurably better, it does not ship.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head reveal"><span class="sec-num">02</span><h2>Same page, rebuilt</h2></div>
+      <p class="sec-sub reveal">The same vibecoded SaaS page before and after Ungeneric. Words kept; design replaced.</p>
+      <figure class="reveal">
+        <img src="media/before-after.png" alt="Before: slop score 100 out of 100 with purple gradients, glow and stock copy. After: editorial design system, verified 9 out of 100 on re-audit." loading="lazy">
+        <figcaption>before: 100/100 slop — after: 9/100, verified on re-audit</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="systems">
+    <div class="wrap">
+      <div class="sec-head reveal"><span class="sec-num">03</span><h2>Sixteen design systems</h2></div>
+      <p class="sec-sub reveal">One command each. Every tile below is the same page, rebuilt by a different system.</p>
+      <div class="sys-grid reveal">
+        <span class="sys"><i></i>editorial</span><span class="sys"><i></i>brutalist</span><span class="sys"><i></i>swiss</span><span class="sys"><i></i>night</span>
+        <span class="sys"><i></i>blueprint</span><span class="sys"><i></i>botanical</span><span class="sys"><i></i>zine</span><span class="sys"><i></i>construct</span>
+        <span class="sys"><i></i>noir</span><span class="sys"><i></i>memphis</span><span class="sys"><i></i>letterpress</span><span class="sys"><i></i>neon grid</span>
+        <span class="sys"><i></i>bauhaus</span><span class="sys"><i></i>riso print</span><span class="sys"><i></i>arcade</span><span class="sys"><i></i>manuscript</span>
+      </div>
+      <figure class="reveal">
+        <img src="media/systems-strip.png" alt="The same page rebuilt by all sixteen design systems, shown side by side." loading="lazy">
+        <figcaption>a direction is one shareable JSON file: fonts, css, swatches</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head reveal"><span class="sec-num">04</span><h2>The full loop, in your agent</h2></div>
+      <p class="sec-sub reveal">Install, audit, rebuild, re-audit — one command each, inside the agent you already use.</p>
+      <figure class="reveal">
+        <img src="media/demo.gif" alt="Terminal recording of the full loop: install, audit, rebuild, re-audit." loading="lazy">
+        <figcaption>the full loop: install → audit → rebuild → re-audit</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="agents">
+    <div class="wrap">
+      <div class="sec-head reveal"><span class="sec-num">05</span><h2>Works where you work</h2></div>
+      <p class="sec-sub reveal">One installer detects your agents and drops the skill into each one's skills folder. Reload the agent, then say the word.</p>
+      <div class="agents reveal">
+        <div class="agent"><span class="name">Claude Code</span><span class="invoke">/ungeneric</span></div>
+        <div class="agent"><span class="name">Cursor</span><span class="invoke">/ungeneric</span></div>
+        <div class="agent"><span class="name">Codex CLI</span><span class="invoke">$ungeneric</span></div>
+        <div class="agent"><span class="name">Google Antigravity</span><span class="invoke">/ungeneric</span></div>
+        <div class="agent"><span class="name">GitHub Copilot / VS Code</span><span class="invoke">/ungeneric in chat</span></div>
+        <div class="agent"><span class="name">Gemini CLI</span><span class="invoke">"use ungeneric"</span></div>
+        <div class="agent"><span class="name">OpenCode</span><span class="invoke">/ungeneric</span></div>
+        <div class="agent"><span class="name">No agent? Plain CLI</span><span class="invoke">node cli.mjs page.html</span></div>
+      </div>
+      <div class="cmdline reveal"><span class="prompt">$ </span>npx --yes github:saladi-siddharth/ungeneric <b>--agents=claude,cursor</b>  <span style="color:var(--mut)"># pick agents</span></div>
+      <div class="cmdline reveal"><span class="prompt">$ </span>npx --yes github:saladi-siddharth/ungeneric <b>--all</b>  <span style="color:var(--mut)"># every known agent</span></div>
+      <div class="cmdline reveal"><span class="prompt">$ </span>node cli.mjs page.html <b>-d swiss -o clean.html</b>  <span style="color:var(--mut)"># no agent, one command line</span></div>
+    </div>
+  </section>
+
+  <section id="honest">
+    <div class="wrap">
+      <div class="sec-head reveal"><span class="sec-num">06</span><h2>What it is, honestly</h2></div>
+      <p class="sec-sub reveal">A fair view of the unslop field, from each tool's own docs and source.</p>
+      <div class="honest reveal">
+        <div class="win">
+          <h3>Where Ungeneric wins</h3>
+          <ul>
+            <li>The only one that rebuilds the page itself, then proves the fix with a second audit.</li>
+            <li>Deterministic: same input, same output, diffable in CI with <span class="mono">--max-score</span>.</li>
+            <li>Free, offline, no model or API key needed.</li>
+            <li>Works in the most agents: 7 coding agents, plus CLI and a local web tool.</li>
+          </ul>
+        </div>
+        <div class="lose">
+          <h3>Where the others win</h3>
+          <ul>
+            <li>Creative range: steering skills like Impeccable invent a bespoke direction per brief; Ungeneric picks from 16 fixed systems.</li>
+            <li>Detection breadth: sloplint tracks more raw tells; Ungeneric implements the high-signal ones.</li>
+            <li>Nuance: a model judges intent; heuristics can false-positive on unusual but intentional markup.</li>
+          </ul>
+        </div>
+      </div>
+      <p class="note reveal">The slop score is a heuristic — a conversation starter, not a judgment. Field-tested on 20 real public sites: SaaS, restaurants, blogs, schools, clinics, news.</p>
+    </div>
+  </section>
+
+  <div class="cta">
+    <div class="wrap">
+      <p class="kicker reveal">Free and open source</p>
+      <h2 class="reveal">Make your next page <em class="serif" style="color:var(--acc);font-style:italic">un</em>generic.</h2>
+      <p class="reveal">One install. Then: "use ungeneric on index.html".</p>
+      <div class="row reveal">
+        <a class="btn-primary" href="https://github.com/saladi-siddharth/ungeneric" rel="noopener">Get it on GitHub</a>
+        <a class="btn-ghost" href="https://github.com/saladi-siddharth/ungeneric#readme" rel="noopener">Read the README</a>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>UNG<span style="color:var(--acc)">E</span>NERIC · MIT license · built by <a href="https://github.com/saladi-siddharth" rel="noopener">Saladi Siddharth</a></span>
+    <span class="mono">32 checks / 16 design systems / no API key</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var els=document.querySelectorAll('.reveal');
+  var staticMode=/[?&]static/.test(location.search);
+  var reduced=window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(staticMode || reduced || !('IntersectionObserver' in window)){
+    els.forEach(function(el){ el.classList.add('in'); });
+  } else {
+    els.forEach(function(el){ el.classList.add('pre'); });
+    var io=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.remove('pre'); e.target.classList.add('in'); io.unobserve(e.target); } });
+    },{threshold:.12});
+    els.forEach(function(el){ io.observe(el); });
+  }
+  document.querySelectorAll('.copy').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      var text=btn.getAttribute('data-copy');
+      function done(){ btn.textContent='Copied'; btn.classList.add('done'); setTimeout(function(){ btn.textContent='Copy'; btn.classList.remove('done'); },1600); }
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(done, function(){ fallback(); });
+      } else { fallback(); }
+      function fallback(){
+        var ta=document.createElement('textarea'); ta.value=text; ta.style.position='fixed'; ta.style.opacity='0';
+        document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); done(); }catch(e){ btn.textContent='Select'; }
+        document.body.removeChild(ta);
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
