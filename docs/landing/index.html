@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Ungeneric · Fix AI slop in your UI, and prove it</title>
+    <meta name="description" content="Ungeneric is a free, local, MIT-licensed skill for your coding agent that turns vibecoded, AI-looking UI into designed UI." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+    />
+    <link rel="stylesheet" href="hark.css" />
+    <link rel="stylesheet" href="hark-hero.css" />
+    <style>
+      .x-cmd {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        max-width: 100%;
+        padding: 6px 6px 6px 14px;
+        border-radius: var(--r-s);
+        background: var(--fill-tertiary);
+        border: 1px solid var(--stroke-secondary);
+        color: var(--text-primary);
+      }
+      .x-cmd code {
+        flex: 1;
+        min-width: 0;
+        font: var(--weight-regular) var(--size-small) / var(--lh) "Geist Mono", ui-monospace, monospace;
+        overflow-wrap: anywhere;
+        padding-block: 6px;
+      }
+      .x-cmd code::before { content: "$ "; color: var(--text-secondary); }
+      .x-cmd button { flex: none; cursor: pointer; min-height: var(--tap); }
+      .x-code {
+        font: var(--weight-regular) var(--size-small) / var(--lh) "Geist Mono", ui-monospace, monospace;
+      }
+      .x-stack { display: grid; gap: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="page" id="top">
+      <header class="nav glass" data-auto></header>
+      <main class="main">
+        <figure class="band">
+          <img src="banner.png" alt="Ungeneric wordmark. Don't just detect AI slop. Fix it and prove it." />
+        </figure>
+
+        <section class="hero">
+          <div class="hero__copy">
+            <p class="hero__eyebrow">Free · local · MIT · no account, no API key</p>
+            <h1>Ungeneric</h1>
+            <p class="hero__sub">Don't just detect AI slop. Fix it and prove it.</p>
+            <p class="hero__meta">
+              Say "use ungeneric" in your coding agent. It audits your page on 32 slop checks, rebuilds it with one of
+              16 real design systems, then re-audits the result to prove the fix.
+            </p>
+          </div>
+          <aside class="callout" aria-label="Install">
+            <p class="callout__head">Install with one command</p>
+            <div class="x-cmd">
+              <code>npx --yes github:saladi-siddharth/ungeneric</code>
+              <button class="btn" type="button" data-copy="npx --yes github:saladi-siddharth/ungeneric">Copy</button>
+            </div>
+            <a class="btn" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener">Get it on GitHub</a>
+          </aside>
+        </section>
+
+        <section class="stats">
+          <div class="stat"><span class="stat__fig">32 + 12</span><span class="stat__label">Source + rendered checks</span></div>
+          <div class="stat"><span class="stat__fig">16</span><span class="stat__label">Design systems</span></div>
+          <div class="stat"><span class="stat__fig">7</span><span class="stat__label">Coding agents</span></div>
+          <div class="stat"><span class="stat__fig">0</span><span class="stat__label">API keys needed</span></div>
+        </section>
+
+        <section class="section" id="proof" data-nav="Before / after">
+          <div class="head">
+            <p class="head__eyebrow">Before / after</p>
+            <h2>A vibecoded page went from 100/100 on slop to 9/100.</h2>
+            <p class="head__sub">
+              Purple gradients, glow, emoji icons and stock copy scored 100. After the editorial rebuild, the re-audit
+              scored 9. The site's own claims were kept.
+            </p>
+          </div>
+          <figure class="band">
+            <img src="before-after.png" alt="Before: a vibecoded page scoring 100/100 on slop. After: the editorial rebuild scoring 9/100." />
+            <figcaption>The same page before and after the editorial system rebuild</figcaption>
+          </figure>
+        </section>
+
+        <section class="section" id="how" data-nav="How it works">
+          <div class="head">
+            <p class="head__eyebrow">How it works</p>
+            <h2>If it isn't measurably better, it doesn't ship.</h2>
+          </div>
+          <div class="steps">
+            <article class="step">
+              <div class="step__intro"><p class="step__num">01</p><p class="step__eyebrow">Audit</p></div>
+              <div>
+                <h3>Score the page for slop</h3>
+                <ul class="step__pills">
+                  <li><b>32</b> source checks</li>
+                  <li><b>12</b> computed-style checks</li>
+                </ul>
+                <p>The 12 computed-style checks run with <code class="x-code">--render</code>.</p>
+              </div>
+            </article>
+            <article class="step">
+              <div class="step__intro"><p class="step__num">02</p><p class="step__eyebrow">Rebuild</p></div>
+              <div>
+                <h3>Restyle or recompose with a real design system</h3>
+                <ul class="step__pills"><li><b>16</b> design systems</li></ul>
+                <p>Restyle the page, or recompose its layout. Your content and links survive.</p>
+              </div>
+            </article>
+            <article class="step">
+              <div class="step__intro"><p class="step__num">03</p><p class="step__eyebrow">Prove</p></div>
+              <div>
+                <h3>Re-audit every rebuild</h3>
+                <p>The CLI exits non-zero if the output did not improve.</p>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="section" id="catches" data-nav="Checks">
+          <div class="head">
+            <p class="head__eyebrow">What it catches</p>
+            <h2>The tells that make a page look AI-made.</h2>
+          </div>
+          <div class="cards">
+            <div>
+              <h3>Surfaces and color</h3>
+              <ul>
+                <li>Purple gradients</li>
+                <li>Gradient text</li>
+                <li>Glow shadows</li>
+                <li>Glass surfaces</li>
+                <li>Blob shapes</li>
+                <li>Pill radii</li>
+                <li>Fake window chrome</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Type, icons and layout</h3>
+              <ul>
+                <li>Default fonts</li>
+                <li>Emoji icons</li>
+                <li>Sparkle badges</li>
+                <li>Generic heroes</li>
+                <li>Card grids</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Copy</h3>
+              <ul>
+                <li>Stock marketing copy</li>
+                <li>"AI-powered" copy</li>
+                <li>Invented proof stats</li>
+              </ul>
+            </div>
+            <div>
+              <h3>Accessibility</h3>
+              <ul>
+                <li>Missing alt text</li>
+                <li>Removed focus outlines</li>
+                <li>Missing reduced-motion</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="systems" data-nav="Systems">
+          <div class="head">
+            <p class="head__eyebrow">Sixteen design systems</p>
+            <h2>One page, rebuilt sixteen ways.</h2>
+            <p class="head__sub">Each direction is one shareable JSON file.</p>
+          </div>
+          <figure class="band">
+            <img src="systems-strip.png" alt="The same page rebuilt by all 16 Ungeneric design systems" />
+            <figcaption>
+              Editorial, brutalist, swiss, night, blueprint, botanical, zine, construct, noir, memphis, letterpress,
+              neon grid, bauhaus, riso print, arcade, manuscript
+            </figcaption>
+          </figure>
+        </section>
+
+        <section class="section" id="agents" data-nav="Agents">
+          <div class="head">
+            <p class="head__eyebrow">Works in your agent</p>
+            <h2>Seven coding agents, one command each.</h2>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th scope="col">Agent</th><th scope="col">How to invoke</th></tr>
+              </thead>
+              <tbody>
+                <tr><th scope="row">Claude Code</th><td class="x-code">/ungeneric</td></tr>
+                <tr><th scope="row">Cursor</th><td class="x-code">/ungeneric</td></tr>
+                <tr><th scope="row">Codex CLI</th><td class="x-code">$ungeneric</td></tr>
+                <tr><th scope="row">Google Antigravity</th><td class="x-code">/ungeneric</td></tr>
+                <tr><th scope="row">GitHub Copilot / VS Code</th><td><span class="x-code">/ungeneric</span> in chat</td></tr>
+                <tr><th scope="row">Gemini CLI</th><td class="x-code">"use ungeneric"</td></tr>
+                <tr><th scope="row">OpenCode</th><td class="x-code">/ungeneric</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="fineprint">
+            Install flags: <code class="x-code">--agents=claude,cursor</code> · <code class="x-code">--all</code> ·
+            <code class="x-code">--global</code>
+          </p>
+        </section>
+
+        <section class="section" id="cli" data-nav="CLI">
+          <div class="head">
+            <p class="head__eyebrow">No agent?</p>
+            <h2>Use the CLI, on local files and live URLs.</h2>
+          </div>
+          <div class="x-cmd">
+            <code>node cli.mjs page.html -d swiss -o clean.html</code>
+            <button class="btn" type="button" data-copy="node cli.mjs page.html -d swiss -o clean.html">Copy</button>
+          </div>
+          <div class="cards">
+            <div>
+              <h3>Flags</h3>
+              <ul>
+                <li><code class="x-code">--polish</code> keeps the design, strips only the tells</li>
+                <li><code class="x-code">--json</code></li>
+                <li><code class="x-code">--directions</code></li>
+                <li><code class="x-code">--max-score N</code> as a CI gate</li>
+                <li><code class="x-code">--render</code></li>
+                <li><code class="x-code">--annotate report.png</code></li>
+              </ul>
+            </div>
+            <div>
+              <h3>Local web tool</h3>
+              <p>A local web tool (<code class="x-code">index.html</code>) that works offline.</p>
+              <ul>
+                <li>Before/after view on desktop and phone</li>
+                <li>Wipe slider</li>
+                <li>Click-to-edit</li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="scope" data-nav="Scope">
+          <div class="head">
+            <p class="head__eyebrow">Honest scope</p>
+            <h2>What Ungeneric is, and what it isn't.</h2>
+          </div>
+          <div class="cards">
+            <div>
+              <h3>No images, no paid services</h3>
+              <p>It does not generate images or call any paid service.</p>
+            </div>
+            <div>
+              <h3>A heuristic, not a verdict</h3>
+              <p>The slop score is a conversation starter.</p>
+            </div>
+            <div>
+              <h3>Deterministic</h3>
+              <p>The same input gives the same output, so you can diff it in CI.</p>
+            </div>
+            <div>
+              <h3>Fixed systems</h3>
+              <p>It picks from 16 fixed systems rather than inventing a bespoke design.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="section" id="install" data-nav="Install">
+          <div class="head">
+            <h2>Install Ungeneric with one command.</h2>
+            <p class="head__sub">Free, local and MIT-licensed. No account, no API key.</p>
+          </div>
+          <aside class="callout" aria-label="Install">
+            <p class="callout__head">Get started</p>
+            <p class="callout__lead"><strong>Run it, then say "use ungeneric" in your agent.</strong></p>
+            <div class="x-cmd">
+              <code>npx --yes github:saladi-siddharth/ungeneric</code>
+              <button class="btn" type="button" data-copy="npx --yes github:saladi-siddharth/ungeneric">Copy</button>
+            </div>
+            <a class="btn" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener">Get it on GitHub</a>
+          </aside>
+        </section>
+      </main>
+      <footer class="foot">
+        <p>
+          MIT license · made by Saladi Siddharth ·
+          <a class="link" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener">GitHub</a>
+        </p>
+        <nav aria-label="Back to sections" data-auto></nav>
+        <a class="badge" href="https://hark.com/" target="_blank" rel="noopener"
+          ><span class="hark-mark"></span><span>built by hark</span></a
+        >
+      </footer>
+    </div>
+    <script src="hark.js"></script>
+    <script>
+      document.querySelectorAll("[data-copy]").forEach(function (b) {
+        b.addEventListener("click", function () {
+          var text = b.getAttribute("data-copy");
+          var done = function () {
+            b.textContent = "Copied";
+            setTimeout(function () { b.textContent = "Copy"; }, 1600);
+          };
+          var fallback = function () {
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "fixed";
+            ta.style.opacity = "0";
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand("copy"); } catch (e) {}
+            ta.remove();
+          };
+          done();
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).catch(fallback);
+          } else {
+            fallback();
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
