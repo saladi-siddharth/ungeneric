@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://saladi-siddharth.github.io/ungeneric/landing/"><b>🌐 Website: saladi-siddharth.github.io/ungeneric/landing</b></a>
+  <a href="https://saladi-siddharth.github.io/ungeneric/landing/"><b>Website: saladi-siddharth.github.io/ungeneric/landing</b></a>
 </p>
 
 A skill for your coding agent that turns vibecoded, AI-looking UI into designed UI. Free, local, no account, no API key.
