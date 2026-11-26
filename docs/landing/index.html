@@ -1,332 +1,666 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Ungeneric · Fix AI slop in your UI, and prove it</title>
-    <meta name="description" content="Ungeneric is a free, local, MIT-licensed skill for your coding agent that turns vibecoded, AI-looking UI into designed UI." />
+    <title>Ungeneric · Every AI-built page looks the same. Fix it, and prove it.</title>
+    <meta name="description" content="A free, local, MIT-licensed skill for your coding agent. It audits your page on 32 slop checks, rebuilds it with one of 16 design systems, then re-audits the result to prove the fix." />
+    <meta name="theme-color" content="#FAF8F3" />
+    <meta property="og:title" content="Ungeneric" />
+    <meta property="og:description" content="Every AI-built page looks the same. Ungeneric fixes that, and proves it." />
+    <meta property="og:image" content="social-preview.png" />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,300..500&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,400;0,500;1,400&display=swap"
     />
     <link rel="stylesheet" href="hark.css" />
     <link rel="stylesheet" href="hark-hero.css" />
     <style>
+      :root {
+        --x-paper: #FAF8F3;
+        --x-paper-2: #F3EFE6;
+        --x-ink: #141414;
+        --x-ink-2: #57514A;
+        --x-rule: #E4DED3;
+        --x-accent: #C2410C;
+        --x-ease: cubic-bezier(0.16, 1, 0.3, 1);
+        --x-dur: 700ms;
+        --x-serif: "Fraunces", Georgia, "Times New Roman", serif;
+        --x-sans: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+        --x-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+        --x-pad: clamp(20px, 5vw, 72px);
+        color-scheme: light;
+      }
+      html, body { background: var(--x-paper); }
+      body {
+        color: var(--x-ink);
+        font: 400 17px/1.6 var(--x-sans);
+        font-kerning: normal;
+      }
+      ::selection { background: var(--x-ink); color: var(--x-paper); }
+      :focus-visible { outline: 2px solid var(--x-accent); outline-offset: 3px; border-radius: 2px; }
+      .x-skip {
+        position: absolute; left: 12px; top: -60px; z-index: 50;
+        padding: 10px 14px; background: var(--x-ink); color: var(--x-paper);
+        font: 500 13px/1 var(--x-mono); text-decoration: none;
+      }
+      .x-skip:focus { top: 12px; }
+
+      /* progress line */
+      .x-progress {
+        position: fixed; inset: 0 0 auto 0; height: 2px; z-index: 40;
+        background: var(--x-ink); transform: scaleX(0); transform-origin: 0 50%;
+      }
+
+      /* frame and grid */
+      .x-site { max-width: 1360px; margin: 0 auto; padding-inline: var(--x-pad); }
+      .x-grid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); column-gap: clamp(16px, 2vw, 32px); }
+      .x-grid > * { grid-column: 1 / -1; min-width: 0; }
+
+      /* masthead */
+      .x-mast {
+        display: flex; align-items: center; justify-content: space-between; gap: 24px;
+        padding-block: 22px; border-bottom: 1px solid var(--x-rule);
+      }
+      .x-word { font: 400 24px/1 var(--x-serif); font-variation-settings: "opsz" 72; letter-spacing: -0.02em; text-decoration: none; }
+      .x-word i { font-style: italic; color: var(--x-accent); }
+      .x-mast nav { display: flex; gap: clamp(14px, 2.4vw, 32px); }
+      .x-mast nav a, .x-label, .x-cap, .x-kicker {
+        font: 400 12px/1.5 var(--x-mono); letter-spacing: 0.08em; text-transform: uppercase;
+      }
+      .x-mast nav a { text-decoration: none; color: var(--x-ink-2); padding-block: 12px; }
+      .x-mast nav a:hover { color: var(--x-ink); }
+      @media (max-width: 719px) { .x-mast nav a:not(.x-keep) { display: none; } }
+
+      /* type */
+      .x-display, .x-h2, .x-h3, .x-score {
+        font-family: var(--x-serif); font-weight: 300; color: var(--x-ink);
+        font-optical-sizing: auto;
+      }
+      .x-display {
+        font-size: clamp(42px, 7.6vw, 118px); line-height: 0.98; letter-spacing: -0.035em;
+        font-variation-settings: "opsz" 144; max-width: 15ch;
+      }
+      .x-h2 {
+        font-size: clamp(34px, 5vw, 72px); line-height: 1.02; letter-spacing: -0.03em;
+        font-variation-settings: "opsz" 120; max-width: 18ch;
+      }
+      .x-h3 { font-size: clamp(26px, 2.6vw, 36px); line-height: 1.1; letter-spacing: -0.02em; font-weight: 400; }
+      .x-display em, .x-h2 em, .x-h3 em { font-style: italic; font-weight: 300; }
+      .x-kicker { color: var(--x-ink-2); }
+      .x-label { color: var(--x-accent); }
+      .x-label span { color: var(--x-ink-2); }
+      .x-lede { font-size: clamp(18px, 1.6vw, 21px); line-height: 1.55; max-width: 38ch; color: var(--x-ink); }
+      .x-body { max-width: 52ch; color: var(--x-ink-2); }
+      .x-body p + p { margin-top: 1em; }
+      .x-body strong { color: var(--x-ink); font-weight: 500; }
+      code, .x-mono { font-family: var(--x-mono); font-size: max(12px, 0.88em); }
+      .x-skip { display: inline-flex; align-items: center; min-height: 44px; }
+      .x-word { display: inline-flex; align-items: center; min-height: 44px; }
+      .x-mast nav a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+      .x-foot p a { display: inline-flex; align-items: center; min-height: 44px; min-width: 44px; }
+      .x-body code { color: var(--x-ink); }
+
+      /* links */
+      .x-link {
+        display: inline-flex; align-items: center; min-height: 44px;
+        font: 500 15px/1.2 var(--x-sans); color: var(--x-ink); text-decoration: none;
+      }
+      .x-link span { background: linear-gradient(var(--x-accent), var(--x-accent)) 0 100% / 100% 1px no-repeat; padding-bottom: 3px; }
+      .x-link:hover span { background-size: 100% 2px; }
+
+      /* install command */
       .x-cmd {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        max-width: 100%;
-        padding: 6px 6px 6px 14px;
-        border-radius: var(--r-s);
-        background: var(--fill-tertiary);
-        border: 1px solid var(--stroke-secondary);
-        color: var(--text-primary);
+        display: flex; align-items: stretch; max-width: 620px; width: 100%;
+        border: 1px solid var(--x-ink); background: var(--x-paper);
       }
       .x-cmd code {
-        flex: 1;
-        min-width: 0;
-        font: var(--weight-regular) var(--size-small) / var(--lh) "Geist Mono", ui-monospace, monospace;
-        overflow-wrap: anywhere;
-        padding-block: 6px;
+        flex: 1; min-width: 0; padding: 14px 16px; font: 400 14px/1.5 var(--x-mono);
+        overflow-wrap: anywhere; color: var(--x-ink);
       }
-      .x-cmd code::before { content: "$ "; color: var(--text-secondary); }
-      .x-cmd button { flex: none; cursor: pointer; min-height: var(--tap); }
-      .x-code {
-        font: var(--weight-regular) var(--size-small) / var(--lh) "Geist Mono", ui-monospace, monospace;
+      .x-cmd code::before { content: "$ "; color: var(--x-accent); }
+      .x-copy {
+        flex: none; min-width: 84px; min-height: 44px; padding: 0 16px; cursor: pointer;
+        border: 0; border-left: 1px solid var(--x-ink); border-radius: 0;
+        background: var(--x-ink); color: var(--x-paper);
+        font: 500 12px/1 var(--x-mono); letter-spacing: 0.08em; text-transform: uppercase;
       }
-      .x-stack { display: grid; gap: 12px; }
+      .x-copy:hover { background: #2a2a2a; }
+      .x-copy:focus-visible { outline-offset: -5px; outline-color: var(--x-paper); }
+      .x-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 28px; }
+
+      /* figures */
+      .x-fig { margin: 0; }
+      .x-frame { border: 1px solid var(--x-rule); background: var(--x-paper-2); padding: clamp(6px, 0.8vw, 10px); overflow: hidden; }
+      .x-frame img { width: 100%; height: auto; display: block; }
+      .x-cap { display: flex; gap: 6px 16px; flex-wrap: wrap; justify-content: space-between; margin-top: 12px; color: var(--x-ink-2); text-transform: none; letter-spacing: 0.02em; }
+      .x-cap b { font-weight: 500; color: var(--x-ink); }
+      .x-cap .x-sc { color: var(--x-accent); }
+
+      /* chapters */
+      .x-chapter { padding-block: clamp(72px, 11vw, 160px) 0; }
+      .x-chapter-head { row-gap: 20px; margin-bottom: clamp(40px, 6vw, 80px); }
+      .x-rule { border-top: 1px solid var(--x-rule); padding-top: 18px; }
+      @media (min-width: 900px) {
+        .x-chapter-head > .x-label { grid-column: 1 / 4; padding-top: 0.9em; }
+        .x-chapter-head > .x-h2 { grid-column: 4 / 13; }
+        .x-chapter-head > .x-body { grid-column: 4 / 10; }
+      }
+
+      /* hero */
+      .x-hero { padding-top: clamp(56px, 9vw, 128px); row-gap: 32px; }
+      .x-hero .x-actions { margin-top: 8px; }
+      .x-hero-fig { margin-top: clamp(48px, 7vw, 96px); }
+      @media (min-width: 900px) {
+        .x-hero .x-lede, .x-hero .x-actions { grid-column: 1 / 8; }
+        .x-hero-fig { grid-column: 3 / 13; }
+      }
+
+      /* 01 problem */
+      .x-problem { row-gap: 40px; }
+      .x-specimen {
+        display: inline-block; font: 400 0.82em/1.4 var(--x-mono); color: var(--x-ink);
+        border-bottom: 1px dashed var(--x-ink-2); padding: 0 2px; white-space: nowrap;
+      }
+      .x-tells { list-style: none; margin: 24px 0 0; padding: 0; border-top: 1px solid var(--x-rule); }
+      .x-tells li { padding: 10px 0; border-bottom: 1px solid var(--x-rule); color: var(--x-ink-2); font-size: 15px; }
+      @media (min-width: 900px) {
+        .x-problem > .x-fig { grid-column: 1 / 9; }
+        .x-problem > .x-body { grid-column: 9 / 13; align-self: end; }
+      }
+
+      /* 02 diagnosis */
+      .x-diag { row-gap: 40px; align-items: start; }
+      .x-score { font-size: clamp(88px, 15vw, 220px); line-height: 0.85; letter-spacing: -0.05em; font-variation-settings: "opsz" 144; }
+      .x-score small { font-size: 0.28em; letter-spacing: -0.01em; color: var(--x-ink-2); }
+      .x-findings {
+        list-style: none; margin: 0; padding: 0; counter-reset: f;
+        font: 400 14px/1.4 var(--x-mono); columns: 2; column-gap: clamp(16px, 3vw, 40px);
+      }
+      .x-findings li {
+        counter-increment: f; break-inside: avoid; display: flex; gap: 14px;
+        padding: 9px 0; border-bottom: 1px solid var(--x-rule);
+      }
+      .x-findings li::before { content: counter(f, decimal-leading-zero); color: var(--x-accent); flex: none; }
+      @media (max-width: 459px) { .x-findings { columns: 1; } }
+      @media (min-width: 900px) {
+        .x-diag > .x-scorebox { grid-column: 1 / 6; position: sticky; top: 40px; }
+        .x-diag > .x-findings { grid-column: 6 / 13; }
+      }
+
+      /* 03 fix */
+      .x-moves { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--x-ink); }
+      .x-move { row-gap: 12px; padding-block: clamp(28px, 4vw, 48px); border-bottom: 1px solid var(--x-rule); align-items: baseline; }
+      .x-move-num { font: 300 clamp(48px, 6vw, 88px)/0.9 var(--x-serif); font-style: italic; color: var(--x-accent); letter-spacing: -0.03em; }
+      .x-move .x-body { font-size: 17px; }
+      @media (min-width: 900px) {
+        .x-move-num { grid-column: 1 / 3; }
+        .x-move .x-h3 { grid-column: 3 / 7; }
+        .x-move .x-body { grid-column: 7 / 13; }
+      }
+
+      /* 04 proof: wipe */
+      .x-wipe {
+        position: relative; aspect-ratio: 1440 / 900; overflow: hidden; --pos: 50%;
+        border: 1px solid var(--x-ink); background: var(--x-paper-2); touch-action: pan-y;
+      }
+      .x-wipe img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+      .x-wipe .x-wipe-before { clip-path: inset(0 calc(100% - var(--pos)) 0 0); }
+      .x-wipe-line {
+        position: absolute; top: 0; bottom: 0; left: var(--pos); width: 1px; background: var(--x-paper);
+        box-shadow: 0 0 0 1px var(--x-ink); pointer-events: none;
+      }
+      .x-wipe-knob {
+        position: absolute; top: 50%; left: 50%; width: 44px; height: 44px; margin: -22px 0 0 -22px;
+        border: 1px solid var(--x-ink); background: var(--x-paper); border-radius: 50%;
+        display: grid; place-items: center; font: 500 13px/1 var(--x-mono); color: var(--x-ink);
+      }
+      .x-wipe-tag {
+        position: absolute; top: 12px; padding: 6px 10px; background: var(--x-ink); color: var(--x-paper);
+        font: 400 12px/1.3 var(--x-mono); letter-spacing: 0.06em; text-transform: uppercase; pointer-events: none;
+      }
+      .x-wipe-tag--l { left: 12px; }
+      .x-wipe-tag--r { right: 12px; background: var(--x-paper); color: var(--x-ink); border: 1px solid var(--x-ink); }
+      .x-wipe input {
+        position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize;
+      }
+      .x-wipe:has(input:focus-visible) { outline: 2px solid var(--x-accent); outline-offset: 4px; }
+      .x-tally { row-gap: 24px; margin-top: clamp(40px, 6vw, 72px); }
+      .x-tally > div { border-top: 1px solid var(--x-ink); padding-top: 16px; }
+      .x-tally .x-score { font-size: clamp(72px, 10vw, 150px); }
+      @media (min-width: 720px) {
+        .x-tally > div:first-child { grid-column: 1 / 6; }
+        .x-tally > div:nth-child(2) { grid-column: 6 / 11; }
+      }
+
+      /* 05 gallery */
+      .x-gallery { row-gap: clamp(40px, 5vw, 72px); align-items: start; }
+      @media (min-width: 720px) {
+        .x-g1 { grid-column: 1 / 8; }
+        .x-g2 { grid-column: 8 / 13; margin-top: clamp(60px, 12vw, 180px); }
+        .x-g3 { grid-column: 1 / 5; }
+        .x-g4 { grid-column: 5 / 10; margin-top: 80px; }
+        .x-g5 { grid-column: 10 / 13; margin-top: 24px; }
+        .x-g6 { grid-column: 1 / 13; }
+      }
+      .x-names { list-style: none; margin: 16px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 0; font: 400 13px/1.6 var(--x-mono); color: var(--x-ink-2); }
+      .x-names li:not(:last-child)::after { content: "/"; margin: 0 10px; color: var(--x-rule); }
+
+      /* 06 phones */
+      .x-phones { row-gap: 40px; align-items: start; }
+      .x-phone .x-frame { border-color: var(--x-ink); border-radius: 30px; padding: 8px; background: var(--x-paper); }
+      .x-phone .x-frame img { border-radius: 22px; }
+      .x-phones .x-phone { max-width: 300px; }
+      @media (min-width: 600px) {
+        .x-phones .x-phone:nth-of-type(1) { grid-column: 1 / 7; justify-self: end; width: 100%; }
+        .x-phones .x-phone:nth-of-type(2) { grid-column: 7 / 13; width: 100%; margin-top: 64px; }
+      }
+      @media (min-width: 900px) {
+        .x-phones .x-phone:nth-of-type(1) { grid-column: 4 / 8; justify-self: start; }
+        .x-phones .x-phone:nth-of-type(2) { grid-column: 8 / 12; }
+        .x-phones > .x-body { grid-column: 1 / 4; }
+      }
+
+      /* 07 agents */
+      .x-tools { row-gap: 56px; }
+      .x-table { width: 100%; border-collapse: collapse; font: 400 16px/1.4 var(--x-sans); border-top: 1px solid var(--x-ink); }
+      .x-table th, .x-table td { padding: 14px 0; border-bottom: 1px solid var(--x-rule); text-align: left; vertical-align: baseline; }
+      .x-table thead th { font: 400 12px/1.4 var(--x-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--x-ink-2); padding-block: 12px; }
+      .x-table tbody th { font-weight: 400; padding-right: 16px; }
+      .x-table td { font: 400 14px/1.4 var(--x-mono); }
+      .x-table td span { font-family: var(--x-sans); color: var(--x-ink-2); }
+      .x-flags { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 0 24px; border-top: 1px solid var(--x-ink); }
+      .x-flags dt, .x-flags dd { margin: 0; padding: 12px 0; border-bottom: 1px solid var(--x-rule); }
+      .x-flags dt { font: 400 14px/1.5 var(--x-mono); }
+      .x-flags dd { color: var(--x-ink-2); font-size: 15px; }
+      @media (max-width: 459px) {
+        .x-flags { grid-template-columns: 1fr; }
+        .x-flags dt { border-bottom: 0; padding-bottom: 0; }
+      }
+      .x-sub { font: 400 12px/1.5 var(--x-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--x-ink-2); margin-bottom: 16px; }
+      @media (min-width: 900px) {
+        .x-tools .x-t1 { grid-column: 1 / 7; }
+        .x-tools .x-t2 { grid-column: 8 / 13; }
+      }
+      .x-stack { display: grid; gap: 20px; }
+
+      /* 08 scope */
+      .x-scope { list-style: none; margin: 0; padding: 0; row-gap: 0; border-top: 1px solid var(--x-ink); counter-reset: s; }
+      .x-scope li { counter-increment: s; padding: 24px 0 28px; border-bottom: 1px solid var(--x-rule); }
+      .x-scope li::before { content: counter(s, upper-roman) "."; display: block; font: 400 12px/1 var(--x-mono); color: var(--x-accent); margin-bottom: 14px; letter-spacing: 0.06em; }
+      .x-scope h3 { font: 400 22px/1.2 var(--x-serif); letter-spacing: -0.01em; margin-bottom: 8px; }
+      .x-scope p { color: var(--x-ink-2); max-width: 44ch; }
+      @media (min-width: 720px) {
+        .x-scope li { grid-column: span 6; padding-right: 32px; }
+        .x-scope li:nth-child(even) { border-left: 1px solid var(--x-rule); padding-left: 32px; padding-right: 0; }
+      }
+
+      /* closing */
+      .x-close { padding-block: clamp(96px, 14vw, 200px) clamp(64px, 9vw, 120px); row-gap: 32px; }
+      .x-close .x-display { max-width: 13ch; }
+      @media (min-width: 900px) { .x-close > * { grid-column: 3 / 13; } }
+
+      /* footer */
+      .x-foot {
+        display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;
+        padding-block: 24px 40px; border-top: 1px solid var(--x-rule);
+        font: 400 13px/1.5 var(--x-mono); color: var(--x-ink-2);
+      }
+      .x-foot a:not(.badge) { color: var(--x-ink); text-underline-offset: 3px; text-decoration-color: var(--x-accent); }
+
+      /* reveals: transform and opacity only */
+      .js .x-reveal { opacity: 0; transform: translate3d(0, 28px, 0); transition: opacity var(--x-dur) var(--x-ease), transform var(--x-dur) var(--x-ease); }
+      .js .x-reveal.is-in { opacity: 1; transform: none; }
+      .js .x-frame.x-reveal img { transform: scale(1.04); transition: transform 1400ms var(--x-ease); }
+      .js .x-frame.x-reveal.is-in img { transform: none; }
+      @media (prefers-reduced-motion: reduce) {
+        .js .x-reveal, .js .x-frame.x-reveal img { opacity: 1; transform: none; transition: none; }
+        .x-progress { display: none; }
+        html { scroll-behavior: auto; }
+      }
     </style>
+    <script>document.documentElement.classList.add("js");</script>
   </head>
   <body>
-    <div class="page" id="top">
-      <header class="nav glass" data-auto></header>
-      <main class="main">
-        <figure class="band">
-          <img src="banner.png" alt="Ungeneric wordmark. Don't just detect AI slop. Fix it and prove it." />
-        </figure>
+    <a class="x-skip" href="#main">Skip to content</a>
+    <div class="x-progress" aria-hidden="true"></div>
+    <div class="x-site" id="top">
+      <header class="x-mast">
+        <a class="x-word" href="#top">Ung<i>e</i>neric</a>
+        <nav aria-label="Chapters">
+          <a href="#problem">Problem</a>
+          <a href="#proof">Proof</a>
+          <a href="#systems">Systems</a>
+          <a href="#agents">Install</a>
+          <a class="x-keep" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener">GitHub</a>
+        </nav>
+      </header>
 
-        <section class="hero">
-          <div class="hero__copy">
-            <p class="hero__eyebrow">Free · local · MIT · no account, no API key</p>
-            <h1>Ungeneric</h1>
-            <p class="hero__sub">Don't just detect AI slop. Fix it and prove it.</p>
-            <p class="hero__meta">
-              Say "use ungeneric" in your coding agent. It audits your page on 32 slop checks, rebuilds it with one of
-              16 real design systems, then re-audits the result to prove the fix.
-            </p>
-          </div>
-          <aside class="callout" aria-label="Install">
-            <p class="callout__head">Install with one command</p>
+      <main id="main">
+        <!-- HERO -->
+        <section class="x-grid x-hero" aria-labelledby="hero-title">
+          <p class="x-kicker">Free · local · MIT · no account, no API key</p>
+          <h1 class="x-display" id="hero-title">Every AI-built page looks the <em>same</em>. Ungeneric fixes that, and proves it.</h1>
+          <p class="x-lede">A skill for your coding agent. It audits your page on 32 slop checks, rebuilds it with one of 16 real design systems, then re-audits the result to prove the fix.</p>
+          <div class="x-actions">
             <div class="x-cmd">
               <code>npx --yes github:saladi-siddharth/ungeneric</code>
-              <button class="btn" type="button" data-copy="npx --yes github:saladi-siddharth/ungeneric">Copy</button>
+              <button class="x-copy" type="button" data-copy="npx --yes github:saladi-siddharth/ungeneric" aria-live="polite">Copy</button>
             </div>
-            <a class="btn" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener">Get it on GitHub</a>
-          </aside>
-        </section>
-
-        <section class="stats">
-          <div class="stat"><span class="stat__fig">32 + 12</span><span class="stat__label">Source + rendered checks</span></div>
-          <div class="stat"><span class="stat__fig">16</span><span class="stat__label">Design systems</span></div>
-          <div class="stat"><span class="stat__fig">7</span><span class="stat__label">Coding agents</span></div>
-          <div class="stat"><span class="stat__fig">0</span><span class="stat__label">API keys needed</span></div>
-        </section>
-
-        <section class="section" id="proof" data-nav="Before / after">
-          <div class="head">
-            <p class="head__eyebrow">Before / after</p>
-            <h2>A vibecoded page went from 100/100 on slop to 9/100.</h2>
-            <p class="head__sub">
-              Purple gradients, glow, emoji icons and stock copy scored 100. After the editorial rebuild, the re-audit
-              scored 9. The site's own claims were kept.
-            </p>
+            <a class="x-link" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener"><span>View on GitHub →</span></a>
           </div>
-          <figure class="band">
-            <img src="before-after.png" alt="Before: a vibecoded page scoring 100/100 on slop. After: the editorial rebuild scoring 9/100." />
-            <figcaption>The same page before and after the editorial system rebuild</figcaption>
+          <figure class="x-fig x-hero-fig">
+            <div class="x-frame x-reveal"><img src="banner.png" width="2400" height="630" alt="The Ungeneric wordmark on a dark ground, with the line: Don't just detect AI slop. Fix it and prove it." /></div>
+            <figcaption class="x-cap"><span><b>Fig. 0</b> The wordmark</span><span>32 checks / 16 design systems / no API key</span></figcaption>
           </figure>
         </section>
 
-        <section class="section" id="how" data-nav="How it works">
-          <div class="head">
-            <p class="head__eyebrow">How it works</p>
-            <h2>If it isn't measurably better, it doesn't ship.</h2>
+        <!-- 01 -->
+        <section class="x-chapter" id="problem" aria-labelledby="ch1">
+          <div class="x-grid x-chapter-head x-rule">
+            <p class="x-label">01 <span>The problem</span></p>
+            <h2 class="x-h2 x-reveal" id="ch1">You've seen this page a <em>thousand</em> times.</h2>
           </div>
-          <div class="steps">
-            <article class="step">
-              <div class="step__intro"><p class="step__num">01</p><p class="step__eyebrow">Audit</p></div>
-              <div>
-                <h3>Score the page for slop</h3>
-                <ul class="step__pills">
-                  <li><b>32</b> source checks</li>
-                  <li><b>12</b> computed-style checks</li>
-                </ul>
-                <p>The 12 computed-style checks run with <code class="x-code">--render</code>.</p>
-              </div>
-            </article>
-            <article class="step">
-              <div class="step__intro"><p class="step__num">02</p><p class="step__eyebrow">Rebuild</p></div>
-              <div>
-                <h3>Restyle or recompose with a real design system</h3>
-                <ul class="step__pills"><li><b>16</b> design systems</li></ul>
-                <p>Restyle the page, or recompose its layout. Your content and links survive.</p>
-              </div>
-            </article>
-            <article class="step">
-              <div class="step__intro"><p class="step__num">03</p><p class="step__eyebrow">Prove</p></div>
-              <div>
-                <h3>Re-audit every rebuild</h3>
-                <p>The CLI exits non-zero if the output did not improve.</p>
-              </div>
-            </article>
-          </div>
-        </section>
-
-        <section class="section" id="catches" data-nav="Checks">
-          <div class="head">
-            <p class="head__eyebrow">What it catches</p>
-            <h2>The tells that make a page look AI-made.</h2>
-          </div>
-          <div class="cards">
-            <div>
-              <h3>Surfaces and color</h3>
-              <ul>
-                <li>Purple gradients</li>
-                <li>Gradient text</li>
-                <li>Glow shadows</li>
-                <li>Glass surfaces</li>
-                <li>Blob shapes</li>
-                <li>Pill radii</li>
-                <li>Fake window chrome</li>
-              </ul>
-            </div>
-            <div>
-              <h3>Type, icons and layout</h3>
-              <ul>
-                <li>Default fonts</li>
-                <li>Emoji icons</li>
-                <li>Sparkle badges</li>
-                <li>Generic heroes</li>
-                <li>Card grids</li>
-              </ul>
-            </div>
-            <div>
-              <h3>Copy</h3>
-              <ul>
-                <li>Stock marketing copy</li>
-                <li>"AI-powered" copy</li>
-                <li>Invented proof stats</li>
-              </ul>
-            </div>
-            <div>
-              <h3>Accessibility</h3>
-              <ul>
-                <li>Missing alt text</li>
-                <li>Removed focus outlines</li>
-                <li>Missing reduced-motion</li>
-              </ul>
+          <div class="x-grid x-problem">
+            <figure class="x-fig">
+              <div class="x-frame x-reveal"><img src="before.png" width="1440" height="900" loading="lazy" alt="FlowPilot landing page: purple gradient, gradient headline, a sparkle pill reading New AI-Powered, glowing translucent cards." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 1</b> A typical vibecoded landing page</span><span class="x-sc">slop score 100/100</span></figcaption>
+            </figure>
+            <div class="x-body x-reveal">
+              <p>A purple gradient. A gradient headline. A pill that reads <span class="x-specimen">“New ✨ AI-Powered”</span>. Glowing cards, emoji, stock copy like “Unlock seamless productivity”, and proof stats nobody measured.</p>
+              <p><strong>Readers have learned to read all of it as “AI made this”.</strong> And it costs you their trust before they read a word.</p>
             </div>
           </div>
         </section>
 
-        <section class="section" id="systems" data-nav="Systems">
-          <div class="head">
-            <p class="head__eyebrow">Sixteen design systems</p>
-            <h2>One page, rebuilt sixteen ways.</h2>
-            <p class="head__sub">Each direction is one shareable JSON file.</p>
+        <!-- 02 -->
+        <section class="x-chapter" id="diagnosis" aria-labelledby="ch2">
+          <div class="x-grid x-chapter-head x-rule">
+            <p class="x-label">02 <span>The diagnosis</span></p>
+            <h2 class="x-h2 x-reveal" id="ch2">Ungeneric names <em>every</em> tell.</h2>
           </div>
-          <figure class="band">
-            <img src="systems-strip.png" alt="The same page rebuilt by all 16 Ungeneric design systems" />
-            <figcaption>
-              Editorial, brutalist, swiss, night, blueprint, botanical, zine, construct, noir, memphis, letterpress,
-              neon grid, bauhaus, riso print, arcade, manuscript
-            </figcaption>
+          <div class="x-grid x-diag">
+            <div class="x-scorebox x-reveal">
+              <p class="x-score" aria-label="Slop score 100 out of 100">100<small>/100</small></p>
+              <p class="x-body" style="margin-top: 24px">The real findings from auditing the page in Fig. 1. That is <strong>32 source checks</strong>, plus <strong>12 computed-style checks</strong> with <code>--render</code>.</p>
+            </div>
+            <ol class="x-findings x-reveal" aria-label="Findings">
+              <li>purple-gradient</li>
+              <li>gradient-text</li>
+              <li>tailwind-violet</li>
+              <li>emoji</li>
+              <li>stock-copy</li>
+              <li>pill-radius</li>
+              <li>glow</li>
+              <li>default-font</li>
+              <li>card-grid</li>
+              <li>invented-proof</li>
+              <li>nested-cards</li>
+              <li>odd-spacing</li>
+              <li>generic-hero</li>
+              <li>loop-motion</li>
+              <li>transition-all</li>
+              <li>hover-scale</li>
+              <li>no-reduced-motion</li>
+              <li>badge-sparkle</li>
+              <li>ai-powered</li>
+            </ol>
+          </div>
+        </section>
+
+        <!-- 03 -->
+        <section class="x-chapter" id="fix" aria-labelledby="ch3">
+          <div class="x-grid x-chapter-head x-rule">
+            <p class="x-label">03 <span>The fix</span></p>
+            <h2 class="x-h2 x-reveal" id="ch3">The fix, in <em>three</em> moves.</h2>
+          </div>
+          <ol class="x-moves">
+            <li class="x-grid x-move x-reveal">
+              <p class="x-move-num" aria-hidden="true">1</p>
+              <h3 class="x-h3">Audit</h3>
+              <p class="x-body">Score the page on <strong>32 source checks</strong> and <strong>12 rendered checks</strong>.</p>
+            </li>
+            <li class="x-grid x-move x-reveal">
+              <p class="x-move-num" aria-hidden="true">2</p>
+              <h3 class="x-h3">Rebuild</h3>
+              <p class="x-body">Restyle or recompose with one of <strong>16 design systems</strong>. Your content and links survive.</p>
+            </li>
+            <li class="x-grid x-move x-reveal">
+              <p class="x-move-num" aria-hidden="true">3</p>
+              <h3 class="x-h3">Prove</h3>
+              <p class="x-body">Re-audit every rebuild. The CLI <strong>exits non-zero</strong> if the output did not improve.</p>
+            </li>
+          </ol>
+        </section>
+
+        <!-- 04 -->
+        <section class="x-chapter" id="proof" aria-labelledby="ch4">
+          <div class="x-grid x-chapter-head x-rule">
+            <p class="x-label">04 <span>The proof</span></p>
+            <h2 class="x-h2 x-reveal" id="ch4">Same page. Score 100 to <em>9</em>.</h2>
+            <p class="x-body">Drag across the page, or focus it and use the arrow keys.</p>
+          </div>
+          <figure class="x-fig">
+            <div class="x-wipe x-reveal" id="wipe">
+              <img src="editorial.png" width="1440" height="900" loading="lazy" alt="The same FlowPilot page rebuilt by the editorial system: serif headline, warm paper, hairline rules." />
+              <img class="x-wipe-before" src="before.png" width="1440" height="900" loading="lazy" alt="" aria-hidden="true" />
+              <span class="x-wipe-tag x-wipe-tag--l">Before · 100/100</span>
+              <span class="x-wipe-tag x-wipe-tag--r">After · 9/100</span>
+              <div class="x-wipe-line" aria-hidden="true"><span class="x-wipe-knob">↔</span></div>
+              <input type="range" min="0" max="100" value="50" step="1" aria-label="Wipe between the original page and the editorial rebuild" />
+            </div>
+            <figcaption class="x-cap"><span><b>Fig. 2</b> Before, and the editorial rebuild</span><span class="x-sc">re-audit 9/100</span></figcaption>
           </figure>
+          <div class="x-grid x-tally">
+            <div class="x-reveal"><p class="x-kicker">Before</p><p class="x-score">100<small>/100</small></p></div>
+            <div class="x-reveal"><p class="x-kicker">After, editorial</p><p class="x-score"><em style="font-style: italic">9</em><small>/100</small></p></div>
+          </div>
         </section>
 
-        <section class="section" id="agents" data-nav="Agents">
-          <div class="head">
-            <p class="head__eyebrow">Works in your agent</p>
-            <h2>Seven coding agents, one command each.</h2>
+        <!-- 05 -->
+        <section class="x-chapter" id="systems" aria-labelledby="ch5">
+          <div class="x-grid x-chapter-head x-rule">
+            <p class="x-label">05 <span>One page, many voices</span></p>
+            <h2 class="x-h2 x-reveal" id="ch5">Sixteen design systems. Each a <em>single</em> JSON file.</h2>
+            <p class="x-body">Real rebuilds of the same page, each re-audited.</p>
           </div>
-          <div class="table-wrap">
-            <table>
-              <thead>
-                <tr><th scope="col">Agent</th><th scope="col">How to invoke</th></tr>
-              </thead>
-              <tbody>
-                <tr><th scope="row">Claude Code</th><td class="x-code">/ungeneric</td></tr>
-                <tr><th scope="row">Cursor</th><td class="x-code">/ungeneric</td></tr>
-                <tr><th scope="row">Codex CLI</th><td class="x-code">$ungeneric</td></tr>
-                <tr><th scope="row">Google Antigravity</th><td class="x-code">/ungeneric</td></tr>
-                <tr><th scope="row">GitHub Copilot / VS Code</th><td><span class="x-code">/ungeneric</span> in chat</td></tr>
-                <tr><th scope="row">Gemini CLI</th><td class="x-code">"use ungeneric"</td></tr>
-                <tr><th scope="row">OpenCode</th><td class="x-code">/ungeneric</td></tr>
-              </tbody>
-            </table>
-          </div>
-          <p class="fineprint">
-            Install flags: <code class="x-code">--agents=claude,cursor</code> · <code class="x-code">--all</code> ·
-            <code class="x-code">--global</code>
-          </p>
-        </section>
-
-        <section class="section" id="cli" data-nav="CLI">
-          <div class="head">
-            <p class="head__eyebrow">No agent?</p>
-            <h2>Use the CLI, on local files and live URLs.</h2>
-          </div>
-          <div class="x-cmd">
-            <code>node cli.mjs page.html -d swiss -o clean.html</code>
-            <button class="btn" type="button" data-copy="node cli.mjs page.html -d swiss -o clean.html">Copy</button>
-          </div>
-          <div class="cards">
-            <div>
-              <h3>Flags</h3>
-              <ul>
-                <li><code class="x-code">--polish</code> keeps the design, strips only the tells</li>
-                <li><code class="x-code">--json</code></li>
-                <li><code class="x-code">--directions</code></li>
-                <li><code class="x-code">--max-score N</code> as a CI gate</li>
-                <li><code class="x-code">--render</code></li>
-                <li><code class="x-code">--annotate report.png</code></li>
+          <div class="x-grid x-gallery">
+            <figure class="x-fig x-g1">
+              <div class="x-frame x-reveal"><img src="editorial.png" width="1440" height="900" loading="lazy" alt="Editorial rebuild: serif type on warm paper with a ruled figure." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 3</b> editorial</span><span class="x-sc">9/100</span></figcaption>
+            </figure>
+            <figure class="x-fig x-g2">
+              <div class="x-frame x-reveal"><img src="swiss.png" width="1440" height="900" loading="lazy" alt="Swiss rebuild: grotesque type on a strict grid." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 4</b> swiss</span><span class="x-sc">9/100</span></figcaption>
+            </figure>
+            <figure class="x-fig x-g3">
+              <div class="x-frame x-reveal"><img src="brutalist.png" width="1440" height="900" loading="lazy" alt="Brutalist rebuild: heavy borders and raw type." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 5</b> brutalist</span><span class="x-sc">9/100</span></figcaption>
+            </figure>
+            <figure class="x-fig x-g4">
+              <div class="x-frame x-reveal"><img src="night.png" width="1440" height="900" loading="lazy" alt="Night rebuild: a dark page with restrained type." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 6</b> night</span><span class="x-sc">6/100</span></figcaption>
+            </figure>
+            <figure class="x-fig x-g5">
+              <div class="x-frame x-reveal"><img src="botanical.png" width="1440" height="900" loading="lazy" alt="Botanical rebuild: soft greens and a classic serif." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 7</b> botanical</span><span class="x-sc">9/100</span></figcaption>
+            </figure>
+            <figure class="x-fig x-g6">
+              <div class="x-frame x-reveal"><img src="systems-strip.png" width="2040" height="1499" loading="lazy" alt="The same page rebuilt by all 16 Ungeneric design systems, in a grid." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 8</b> All sixteen systems, one page</span></figcaption>
+              <ul class="x-names" aria-label="The 16 design systems">
+                <li>editorial</li><li>brutalist</li><li>swiss</li><li>night</li><li>blueprint</li><li>botanical</li><li>zine</li><li>construct</li><li>noir</li><li>memphis</li><li>letterpress</li><li>neon grid</li><li>bauhaus</li><li>riso print</li><li>arcade</li><li>manuscript</li>
               </ul>
+            </figure>
+          </div>
+        </section>
+
+        <!-- 06 -->
+        <section class="x-chapter" id="phone" aria-labelledby="ch6">
+          <div class="x-grid x-chapter-head x-rule">
+            <p class="x-label">06 <span>On a phone too</span></p>
+            <h2 class="x-h2 x-reveal" id="ch6">The rebuild holds up at <em>390</em> pixels.</h2>
+          </div>
+          <div class="x-grid x-phones">
+            <figure class="x-fig x-phone">
+              <div class="x-frame x-reveal"><img src="before-mobile.png" width="780" height="1688" loading="lazy" alt="The original FlowPilot page on a phone: purple gradient and glowing cards." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 9</b> Before</span><span>390px wide</span></figcaption>
+            </figure>
+            <figure class="x-fig x-phone">
+              <div class="x-frame x-reveal"><img src="editorial-mobile.png" width="780" height="1688" loading="lazy" alt="The editorial rebuild on a phone: serif headline on warm paper." /></div>
+              <figcaption class="x-cap"><span><b>Fig. 10</b> Editorial rebuild</span><span>390px wide</span></figcaption>
+            </figure>
+          </div>
+        </section>
+
+        <!-- 07 -->
+        <section class="x-chapter" id="agents" aria-labelledby="ch7">
+          <div class="x-grid x-chapter-head x-rule">
+            <p class="x-label">07 <span>Where you code</span></p>
+            <h2 class="x-h2 x-reveal" id="ch7">Works where you <em>already</em> code.</h2>
+          </div>
+          <div class="x-grid x-tools">
+            <div class="x-t1 x-reveal">
+              <table class="x-table">
+                <thead><tr><th scope="col">Agent</th><th scope="col">Invoke with</th></tr></thead>
+                <tbody>
+                  <tr><th scope="row">Claude Code</th><td>/ungeneric</td></tr>
+                  <tr><th scope="row">Cursor</th><td>/ungeneric</td></tr>
+                  <tr><th scope="row">Codex CLI</th><td>$ungeneric</td></tr>
+                  <tr><th scope="row">Google Antigravity</th><td>/ungeneric</td></tr>
+                  <tr><th scope="row">GitHub Copilot / VS Code</th><td>/ungeneric <span>in chat</span></td></tr>
+                  <tr><th scope="row">Gemini CLI</th><td>"use ungeneric"</td></tr>
+                  <tr><th scope="row">OpenCode</th><td>/ungeneric</td></tr>
+                </tbody>
+              </table>
+              <p class="x-cap" style="justify-content: flex-start">Install flags: <code>--agents=claude,cursor</code> · <code>--all</code> · <code>--global</code></p>
             </div>
-            <div>
-              <h3>Local web tool</h3>
-              <p>A local web tool (<code class="x-code">index.html</code>) that works offline.</p>
-              <ul>
-                <li>Before/after view on desktop and phone</li>
-                <li>Wipe slider</li>
-                <li>Click-to-edit</li>
-              </ul>
+            <div class="x-t2 x-stack x-reveal">
+              <div>
+                <p class="x-sub">No agent? Use the CLI</p>
+                <div class="x-cmd">
+                  <code>node cli.mjs page.html -d swiss -o clean.html</code>
+                  <button class="x-copy" type="button" data-copy="node cli.mjs page.html -d swiss -o clean.html" aria-live="polite">Copy</button>
+                </div>
+              </div>
+              <dl class="x-flags">
+                <dt>--polish</dt><dd>Keeps the design, strips only the tells</dd>
+                <dt>--json</dt><dd>Machine-readable output</dd>
+                <dt>--directions</dt><dd>List the design systems</dd>
+                <dt>--max-score N</dt><dd>A CI gate</dd>
+                <dt>--render</dt><dd>Adds the 12 computed-style checks</dd>
+                <dt>--annotate report.png</dt><dd>An annotated report image</dd>
+              </dl>
+              <div class="x-body">
+                <p class="x-sub" style="margin-bottom: 8px">Or the local web tool</p>
+                <p>An offline web tool, <code>index.html</code>, with a before/after view on desktop and phone, a wipe slider and click-to-edit.</p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section class="section" id="scope" data-nav="Scope">
-          <div class="head">
-            <p class="head__eyebrow">Honest scope</p>
-            <h2>What Ungeneric is, and what it isn't.</h2>
+        <!-- 08 -->
+        <section class="x-chapter" id="scope" aria-labelledby="ch8">
+          <div class="x-grid x-chapter-head x-rule">
+            <p class="x-label">08 <span>Honest scope</span></p>
+            <h2 class="x-h2 x-reveal" id="ch8">What it is, and what it <em>isn't</em>.</h2>
           </div>
-          <div class="cards">
-            <div>
-              <h3>No images, no paid services</h3>
-              <p>It does not generate images or call any paid service.</p>
-            </div>
-            <div>
-              <h3>A heuristic, not a verdict</h3>
-              <p>The slop score is a conversation starter.</p>
-            </div>
-            <div>
-              <h3>Deterministic</h3>
-              <p>The same input gives the same output, so you can diff it in CI.</p>
-            </div>
-            <div>
-              <h3>Fixed systems</h3>
-              <p>It picks from 16 fixed systems rather than inventing a bespoke design.</p>
-            </div>
-          </div>
+          <ul class="x-grid x-scope">
+            <li class="x-reveal"><h3>No images, no paid services</h3><p>It generates no images and calls no paid services.</p></li>
+            <li class="x-reveal"><h3>A heuristic, not a verdict</h3><p>The slop score is a conversation starter.</p></li>
+            <li class="x-reveal"><h3>Deterministic</h3><p>Same input, same output, so you can diff it in CI.</p></li>
+            <li class="x-reveal"><h3>Sixteen fixed systems</h3><p>It picks from 16 fixed systems rather than inventing a bespoke design.</p></li>
+          </ul>
         </section>
 
-        <section class="section" id="install" data-nav="Install">
-          <div class="head">
-            <h2>Install Ungeneric with one command.</h2>
-            <p class="head__sub">Free, local and MIT-licensed. No account, no API key.</p>
-          </div>
-          <aside class="callout" aria-label="Install">
-            <p class="callout__head">Get started</p>
-            <p class="callout__lead"><strong>Run it, then say "use ungeneric" in your agent.</strong></p>
+        <!-- CLOSE -->
+        <section class="x-grid x-close" id="install" aria-labelledby="close-title">
+          <p class="x-label">Install</p>
+          <h2 class="x-display x-reveal" id="close-title">Make your next page look <em>designed</em>.</h2>
+          <div class="x-actions">
             <div class="x-cmd">
               <code>npx --yes github:saladi-siddharth/ungeneric</code>
-              <button class="btn" type="button" data-copy="npx --yes github:saladi-siddharth/ungeneric">Copy</button>
+              <button class="x-copy" type="button" data-copy="npx --yes github:saladi-siddharth/ungeneric" aria-live="polite">Copy</button>
             </div>
-            <a class="btn" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener">Get it on GitHub</a>
-          </aside>
+            <a class="x-link" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener"><span>Read the source on GitHub →</span></a>
+          </div>
         </section>
       </main>
-      <footer class="foot">
-        <p>
-          MIT license · made by Saladi Siddharth ·
-          <a class="link" href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener">GitHub</a>
-        </p>
-        <nav aria-label="Back to sections" data-auto></nav>
-        <a class="badge" href="https://hark.com/" target="_blank" rel="noopener"
-          ><span class="hark-mark"></span><span>built by hark</span></a
-        >
+
+      <footer class="x-foot">
+        <p>MIT license · made by Saladi Siddharth · <a href="https://github.com/saladi-siddharth/ungeneric" target="_blank" rel="noopener">GitHub</a></p>
+        <a class="badge" href="https://hark.com/" target="_blank" rel="noopener"><span class="hark-mark"></span><span>built by hark</span></a>
       </footer>
+
     </div>
     <script src="hark.js"></script>
     <script>
-      document.querySelectorAll("[data-copy]").forEach(function (b) {
-        b.addEventListener("click", function () {
-          var text = b.getAttribute("data-copy");
-          var done = function () {
-            b.textContent = "Copied";
-            setTimeout(function () { b.textContent = "Copy"; }, 1600);
-          };
-          var fallback = function () {
-            var ta = document.createElement("textarea");
-            ta.value = text;
-            ta.setAttribute("readonly", "");
-            ta.style.position = "fixed";
-            ta.style.opacity = "0";
-            document.body.appendChild(ta);
-            ta.select();
-            try { document.execCommand("copy"); } catch (e) {}
-            ta.remove();
-          };
-          done();
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text).catch(fallback);
-          } else {
-            fallback();
-          }
+      (function () {
+        var root = document.documentElement;
+        document.addEventListener("DOMContentLoaded", function () { root.setAttribute("data-theme", "light"); });
+        var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        // copy buttons
+        var status = null;
+        document.querySelectorAll("[data-copy]").forEach(function (b) {
+          b.addEventListener("click", function () {
+            var text = b.getAttribute("data-copy");
+            var done = function () {
+              b.textContent = "Copied";
+              if (status) status.textContent = "Copied to clipboard";
+              setTimeout(function () { b.textContent = "Copy"; if (status) status.textContent = ""; }, 1600);
+            };
+            var fallback = function () {
+              var ta = document.createElement("textarea");
+              ta.value = text;
+              ta.setAttribute("readonly", "");
+              ta.style.position = "fixed";
+              ta.style.opacity = "0";
+              document.body.appendChild(ta);
+              ta.select();
+              try { document.execCommand("copy"); } catch (e) {}
+              ta.remove();
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(text).then(done, function () { fallback(); done(); });
+            } else { fallback(); done(); }
+          });
         });
-      });
+
+        // scroll progress
+        var bar = document.querySelector(".x-progress"), ticking = false;
+        function progress() {
+          var h = document.documentElement.scrollHeight - window.innerHeight;
+          bar.style.transform = "scaleX(" + (h > 0 ? Math.min(1, window.scrollY / h) : 0) + ")";
+          ticking = false;
+        }
+        window.addEventListener("scroll", function () { if (!ticking) { ticking = true; requestAnimationFrame(progress); } }, { passive: true });
+        window.addEventListener("resize", progress, { passive: true });
+        progress();
+
+        // reveals
+        var items = document.querySelectorAll(".x-reveal");
+        if (reduce || !("IntersectionObserver" in window)) {
+          items.forEach(function (el) { el.classList.add("is-in"); });
+        } else {
+          var io = new IntersectionObserver(function (entries) {
+            entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("is-in"); io.unobserve(e.target); } });
+          }, { rootMargin: "0px 0px -8% 0px", threshold: 0.08 });
+          items.forEach(function (el) { io.observe(el); });
+        }
+
+        // wipe slider
+        var wipe = document.getElementById("wipe");
+        if (wipe) {
+          var input = wipe.querySelector("input");
+          var set = function () { wipe.style.setProperty("--pos", input.value + "%"); };
+          input.addEventListener("input", set);
+          set();
+        }
+      })();
     </script>
   </body>
 </html>
