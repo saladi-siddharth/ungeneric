@@ -10,6 +10,10 @@
   <img src="docs/media/badges/license.svg" alt="MIT license">
 </p>
 
+<p align="center">
+  <a href="https://saladi-siddharth.github.io/ungeneric/landing/"><b>🌐 Website: saladi-siddharth.github.io/ungeneric/landing</b></a>
+</p>
+
 A skill for your coding agent that turns vibecoded, AI-looking UI into designed UI. Free, local, no account, no API key.
 
 Say **"use ungeneric"** in Claude Code, Cursor, Codex, Google Antigravity, VS Code (Copilot), Gemini CLI or OpenCode, and the agent audits your page on 32 slop checks, rebuilds it with one of sixteen real design systems, then re-audits the result to prove the fix.
